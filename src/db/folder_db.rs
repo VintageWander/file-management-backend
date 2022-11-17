@@ -121,22 +121,27 @@ impl FolderDB {
         old_position: &str,
         old_fullpath: &str,
         new_position: &str,
-        new_fullpath: &str,
     ) -> Result<()> {
-        let position_regex = format!("/^{old_position}/");
-        let fullpath_regex = format!("/^{old_fullpath}/");
+        // fullpath for regex search
+        // use new position to replace old position
+
+        let position_regex = mongodb::bson::Regex {
+            pattern: format!("^{old_fullpath}"),
+            options: String::new(),
+        };
 
         self.collection
             .update_many(
                 doc! {
                     "position": {
-                        "$regex": position_regex
+                        "$regex": position_regex.clone()
                     },
                     "fullpath": {
-                        "$regex": fullpath_regex
+                        "$regex": position_regex
                     }
                 },
-                doc! {
+                vec![
+                    doc! {
                     "$set": {
                         "position": {
                             "$replaceOne": {
@@ -144,16 +149,21 @@ impl FolderDB {
                                 "find": old_position,
                                 "replacement": new_position
                             }
-                        },
-                        "fullpath": {
-                            "$replaceOne": {
-                                "input": "$fullpath",
-                                "find": old_fullpath,
-                                "replacement": new_fullpath
-                            }
                         }
                     }
-                },
+                    },
+                    doc! {
+                        "$set": {
+                            "fullpath": {
+                                "$replaceOne": {
+                                    "input": "$fullpath",
+                                    "find": old_position,
+                                    "replacement": new_position
+                                }
+                            }
+                        }
+                    },
+                ],
                 None,
             )
             .await?;

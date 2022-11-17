@@ -71,7 +71,7 @@ impl FolderService {
             );
         }
 
-        if !self.exists_folder_by_position(&folder.position).await? {
+        if !self.exists_folder_by_fullpath(&folder.position).await? {
             return Err("Cannot create a folder at a virtual position".into());
         }
 
@@ -100,20 +100,10 @@ impl FolderService {
                 return Err("Cannot move folder to a virtual position".into());
             }
             self.folder_db
-                .move_inner_folders(
-                    &old_folder.position,
-                    &old_folder.fullpath,
-                    &folder.position,
-                    &folder.fullpath,
-                )
+                .move_inner_folders(&old_folder.position, &old_folder.fullpath, &folder.position)
                 .await?;
             self.file_db
-                .move_inner_files(
-                    &old_folder.position,
-                    &old_folder.fullpath,
-                    &folder.position,
-                    &folder.fullpath,
-                )
+                .move_inner_files(&old_folder.position, &old_folder.fullpath, &folder.position)
                 .await?;
 
             self.storage
