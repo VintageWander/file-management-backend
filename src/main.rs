@@ -6,7 +6,7 @@ use db::{
     user_db::UserDB,
 };
 use dotenv::dotenv;
-use salvo::{affix, prelude::TcpListener, Router, Server};
+use salvo::{affix, prelude::TcpListener, size_limiter::max_size, Router, Server};
 use service::{
     file_service::FileService, folder_service::FolderService, user_service::UserService,
 };
@@ -48,6 +48,7 @@ async fn main() -> Result<()> {
             .insert("folder_service", folder_service)
             .insert("file_service", file_service),
     )
+    .hoop(max_size(1024 * 1024 * 100)) // limit to 100MBs per request
     .push(routes::routes());
 
     let listener = TcpListener::bind("127.0.0.1:7878");
