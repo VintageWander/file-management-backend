@@ -123,88 +123,46 @@ impl From<SdkError<DeleteObjectsError>> for Error {
 
 impl Piece for Error {
     fn render(self, res: &mut salvo::Response) {
-        match self {
-            Error::Env(e) => {
-                res.render(Web::internal_error("Env file error".to_string(), e));
-                res.set_status_error(StatusError::internal_server_error())
+        let error_message = match self {
+            Error::Var(ref e) => format!("Cannot load one of the environment variables {e}"),
+            Error::Env(ref e) => format!("Env file error: {e}"),
+            Error::MongoDB(ref e) => format!("MongoDB has encountered an error {e}"),
+            Error::Generic(ref e) => format!("Generic error: {e}"),
+            Error::Permissions(ref e) => format!("Permission error: {e}"),
+            Error::Validation(ref e) => {
+                format!("Validation error {}", extract_validation_error(e))
             }
-            Error::Var(e) => {
-                res.render(Web::internal_error(
-                    "Cannot load one of the environment variables".to_string(),
-                    e,
-                ));
-                res.set_status_error(StatusError::internal_server_error())
+            Error::HttpParse(ref e) => format!("Http Parse error: {e}"),
+            Error::Jwt(ref e) => format!("JWT error {e}"),
+            Error::ObjectId(ref e) => format!("ObjectId parse error: {e}"),
+            Error::Presign(ref e) => format!("Presign request error: {e}"),
+            Error::PutObject(ref e) => format!("PutObject error {e}"),
+            Error::GetObject(ref e) => format!("GetObject error {e}"),
+            Error::ListObject(ref e) => format!("ListObject error {e}"),
+            Error::CopyObject(ref e) => format!("Copy Object error {e}"),
+            Error::DeleteObject(ref e) => format!("DeleteObject error {e}"),
+            Error::DeleteObjects(ref e) => format!("DeleteObjects error {e}"),
+            Error::IO(ref e) => format!("IO error {e}"),
+            Error::Aws(ref e) => format!("Aws error {e}"),
+        };
+
+        let error_status = match self {
+            Error::Permissions(_) => StatusError::forbidden(),
+            Error::Generic(_) | Error::Validation(_) | Error::HttpParse(_) | Error::Jwt(_) => {
+                StatusError::bad_request()
             }
-            Error::MongoDB(e) => {
-                res.render(Web::internal_error(
-                    "MongoDB has encountered an error".to_string(),
-                    e,
-                ));
-                res.set_status_error(StatusError::internal_server_error())
+            _ => StatusError::internal_server_error(),
+        };
+
+        let error = match self {
+            Error::Permissions(_) => Web::forbidden(error_message),
+            Error::Generic(_) | Error::Validation(_) | Error::HttpParse(_) | Error::Jwt(_) => {
+                Web::bad_request(error_message)
             }
-            Error::Generic(e) => {
-                res.render(Web::internal_error("Generic error thrown".to_string(), e));
-                res.set_status_error(StatusError::internal_server_error())
-            }
-            Error::Validation(e) => {
-                res.render(Web::bad_request(
-                    "Validation error thrown".to_string(),
-                    extract_validation_error(&e),
-                ));
-                res.set_status_error(StatusError::bad_request())
-            }
-            Error::HttpParse(e) => {
-                res.render(Web::bad_request("HttpParse error thrown".to_string(), e));
-                res.set_status_error(StatusError::bad_request())
-            }
-            Error::Jwt(e) => {
-                res.render(Web::internal_error("JWT error thrown".to_string(), e));
-                res.set_status_error(StatusError::internal_server_error())
-            }
-            Error::ObjectId(e) => {
-                res.render(Web::internal_error("JWT error thrown".to_string(), e));
-                res.set_status_error(StatusError::internal_server_error())
-            }
-            Error::Permissions(e) => {
-                res.render(Web::forbidden("Permissions error thrown".to_string(), e));
-                res.set_status_error(StatusError::forbidden())
-            }
-            Error::Presign(e) => {
-                res.render(Web::internal_error("Presign URL error".to_string(), e));
-                res.set_status_error(StatusError::internal_server_error())
-            }
-            Error::PutObject(e) => {
-                res.render(Web::internal_error("PutObject error".to_string(), e));
-                res.set_status_error(StatusError::internal_server_error())
-            }
-            Error::GetObject(e) => {
-                res.render(Web::internal_error("GetObject error".to_string(), e));
-                res.set_status_error(StatusError::internal_server_error())
-            }
-            Error::IO(e) => {
-                res.render(Web::internal_error("IO error".to_string(), e));
-                res.set_status_error(StatusError::internal_server_error())
-            }
-            Error::Aws(e) => {
-                res.render(Web::internal_error("AWS error".to_string(), e));
-                res.set_status_error(StatusError::internal_server_error())
-            }
-            Error::ListObject(e) => {
-                res.render(Web::internal_error("ListObject error".to_string(), e));
-                res.set_status_error(StatusError::internal_server_error())
-            }
-            Error::CopyObject(e) => {
-                res.render(Web::internal_error("CopyObject error".to_string(), e));
-                res.set_status_error(StatusError::internal_server_error())
-            }
-            Error::DeleteObject(e) => {
-                res.render(Web::internal_error("DeleteObject error".to_string(), e));
-                res.set_status_error(StatusError::internal_server_error())
-            }
-            Error::DeleteObjects(e) => {
-                res.render(Web::internal_error("DeleteObjects error".to_string(), e));
-                res.set_status_error(StatusError::internal_server_error())
-            }
-        }
+            _ => Web::internal_error(error_message),
+        };
+
+        res.render(error);
+        res.set_status_error(error_status);
     }
 }

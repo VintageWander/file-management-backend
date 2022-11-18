@@ -40,10 +40,7 @@ impl Web {
         }
     }
 
-    pub fn ok<T: for<'a> Deserialize<'a> + Serialize>(
-        message: impl ToString,
-        data: T,
-    ) -> Web {
+    pub fn ok<T: for<'a> Deserialize<'a> + Serialize>(message: impl ToString, data: T) -> Web {
         Self {
             code: StatusCode::OK.to_string(),
             message: message.to_string(),
@@ -52,27 +49,27 @@ impl Web {
         }
     }
 
-    pub fn bad_request(message: impl ToString, error: impl ToString) -> Web {
+    pub fn bad_request(error: impl ToString) -> Web {
         Self {
             code: StatusCode::BAD_REQUEST.to_string(),
-            message: message.to_string(),
+            message: String::default(),
             data: json!(&()),
             error: error.to_string(),
         }
     }
 
-    pub fn internal_error(message: impl ToString, error: impl ToString) -> Web {
+    pub fn internal_error(error: impl ToString) -> Web {
         Self {
             code: StatusCode::INTERNAL_SERVER_ERROR.to_string(),
-            message: message.to_string(),
+            message: String::default(),
             data: json!(&()),
             error: error.to_string(),
         }
     }
-    pub fn forbidden(message: impl ToString, error: impl ToString) -> Web {
+    pub fn forbidden(error: impl ToString) -> Web {
         Self {
             code: StatusCode::FORBIDDEN.to_string(),
-            message: message.to_string(),
+            message: String::default(),
             data: json!(&()),
             error: error.to_string(),
         }
