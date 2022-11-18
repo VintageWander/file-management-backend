@@ -51,7 +51,9 @@ async fn main() -> Result<()> {
     .hoop(max_size(1024 * 1024 * 100)) // limit to 100MBs per request
     .push(routes::routes());
 
-    let listener = TcpListener::bind("127.0.0.1:7878");
+    let port = std::env::var("PORT")?;
+
+    let listener = TcpListener::bind(&format!("0.0.0.0:{port}"));
     Server::new(listener).serve(router).await;
     Ok(())
 }
