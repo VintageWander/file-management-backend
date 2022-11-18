@@ -53,7 +53,7 @@ async fn main() -> Result<()> {
 
     let port = std::env::var("PORT")?;
 
-    let listener = TcpListener::bind(&format!("0.0.0.0:{port}"));
+    let listener = TcpListener::bind(&format!("127.0.0.1:{port}"));
     Server::new(listener).serve(router).await;
     Ok(())
 }
