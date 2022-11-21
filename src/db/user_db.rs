@@ -86,7 +86,9 @@ impl UserDB {
         let options = FindOneAndUpdateOptions::builder()
             .return_document(ReturnDocument::After)
             .build();
+
         let user_doc: Document = user.into();
+
         let user = self
             .collection
             .find_one_and_update(doc! {"_id": id}, doc! {"$set": user_doc}, options)

@@ -8,7 +8,7 @@ use aws_sdk_s3::{
 use salvo::{prelude::StatusError, Piece};
 use thiserror::Error;
 
-use crate::{helper::print_validation::extract_validation_error, web::Web, WebResult};
+use crate::{helper::print_validation::extract_validation_error, web::Web};
 
 #[derive(Debug, Error)]
 pub enum Error {
@@ -76,12 +76,6 @@ impl From<String> for Error {
 impl From<&str> for Error {
     fn from(s: &str) -> Self {
         Error::Generic(s.to_string())
-    }
-}
-
-impl From<Error> for WebResult {
-    fn from(e: Error) -> Self {
-        Self::Err(e)
     }
 }
 

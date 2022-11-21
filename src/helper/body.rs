@@ -1,8 +1,8 @@
 use salvo::Request;
 use serde::Deserialize;
 
-use crate::{error::Error, Result};
+use crate::Result;
 
 pub async fn extract_from_body<'a, T: Deserialize<'a>>(req: &'a mut Request) -> Result<T> {
-    req.parse_body::<T>().await.map_err(Error::HttpParse)
+    Ok(req.parse_body::<T>().await?)
 }
