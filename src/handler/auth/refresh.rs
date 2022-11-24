@@ -35,13 +35,23 @@ pub async fn refresh_handler(req: &Request, depot: &Depot, res: &mut Response) -
     // Generate a new access token
     let access_jwt = encode_jwt(&cookie_user, JwtType::Access)?;
 
-    // Append the new access token into the cookies
-    res.add_cookie(
+    // Delete the old cookie if there is one
+    res.cookies_mut().remove(
         Cookie::build("accessToken", access_jwt.clone())
+            .path("/")
             .max_age(Duration::minutes(30))
             .http_only(true)
             .finish(),
     );
 
-    Ok(Web::ok("Successfully refresh the access token", access_jwt))
+    // Append the new access token into the cookies
+    res.add_cookie(
+        Cookie::build("accessToken", access_jwt)
+            .path("/")
+            .max_age(Duration::minutes(30))
+            .http_only(true)
+            .finish(),
+    );
+
+    Ok(Web::ok("Successfully refresh the access token", ()))
 }
