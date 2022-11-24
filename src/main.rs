@@ -6,7 +6,7 @@ use db::{
     user_db::UserDB,
 };
 use dotenv::dotenv;
-use salvo::{affix, prelude::TcpListener, size_limiter::max_size, Router, Server};
+use salvo::{affix, cors::Cors, prelude::TcpListener, size_limiter::max_size, Router, Server};
 use service::{
     file_service::FileService, folder_service::FolderService, user_service::UserService,
 };
@@ -43,13 +43,21 @@ async fn main() -> Result<()> {
     let file_service = FileService::init(&file_db, &folder_db, &file_version_db, &s3);
     let folder_service = FolderService::init(&file_db, &folder_db, &s3);
 
-    let router = Router::with_hoop(
-        affix::insert("user_service", user_service)
-            .insert("folder_service", folder_service)
-            .insert("file_service", file_service),
-    )
-    .hoop(max_size(1024 * 1024 * 100)) // limit to 100MBs per request
-    .push(routes::routes());
+    let cors_builder = Cors::builder()
+        .allow_credentials(true)
+        .allow_any_origin()
+        //.allow_origin("http://192.168.0.193/8100")
+        .allow_methods(vec!["GET", "POST", "PUT", "DELETE"])
+        .build();
+
+    let router = Router::with_hoop(cors_builder)
+        .hoop(
+            affix::insert("user_service", user_service)
+                .insert("folder_service", folder_service)
+                .insert("file_service", file_service),
+        )
+        .hoop(max_size(1024 * 1024 * 100)) // limit to 100MBs per request
+        .push(routes::routes());
 
     let port = std::env::var("PORT")?;
 
