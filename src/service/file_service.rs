@@ -5,7 +5,11 @@ use crate::{
     aws::S3,
     base::{file::File, file_version::FileVersion},
     db::{file_db::FileDB, file_version_db::FileVersionDB, folder_db::FolderDB},
-    helper::versioning::{convert_file_path_to_version_folder, convert_file_path_to_version_path},
+    helper::{
+        into_string,
+        versioning::{convert_file_path_to_version_folder, convert_file_path_to_version_path},
+    },
+    validation::file::{check_dir, check_fullpath},
     Result,
 };
 
@@ -56,11 +60,24 @@ impl FileService {
         self.file_db.get_file_by_id_owner(file_id, owner).await
     }
 
+    pub async fn get_files_by_prefix_position(&self, prefix: &str) -> Result<Vec<File>> {
+        check_dir(prefix).map_err(into_string)?;
+        self.file_db.get_files_by_prefix_position(prefix).await
+    }
+
+    pub async fn get_public_files_by_prefix_position(&self, prefix: &str) -> Result<Vec<File>> {
+        check_dir(prefix).map_err(into_string)?;
+        self.file_db
+            .get_public_files_by_prefix_position(prefix)
+            .await
+    }
+
     pub async fn exists_file_by_id(&self, file_id: &ObjectId) -> Result<bool> {
         self.file_db.exists_file_by_id(file_id).await
     }
 
     pub async fn exists_file_by_fullpath(&self, fullpath: &str) -> Result<bool> {
+        check_fullpath(fullpath).map_err(into_string)?;
         self.file_db.exists_file_by_fullpath(fullpath).await
     }
 

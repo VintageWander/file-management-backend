@@ -4,7 +4,8 @@ use crate::{
     aws::S3,
     base::folder::Folder,
     db::{file_db::FileDB, folder_db::FolderDB},
-    helper::versioning::convert_folder_to_version,
+    helper::{into_string, versioning::convert_folder_to_version},
+    validation::file::check_dir,
     Result,
 };
 
@@ -45,11 +46,20 @@ impl FolderService {
     }
 
     pub async fn get_folder_by_fullpath(&self, fullpath: &str) -> Result<Folder> {
+        check_dir(fullpath).map_err(into_string)?;
         self.folder_db.get_folder_by_fullpath(fullpath).await
     }
 
     pub async fn get_folders_by_prefix_position(&self, prefix: &str) -> Result<Vec<Folder>> {
+        check_dir(prefix).map_err(into_string)?;
         self.folder_db.get_folders_by_prefix_position(prefix).await
+    }
+
+    pub async fn get_public_folders_by_prefix_position(&self, prefix: &str) -> Result<Vec<Folder>> {
+        check_dir(prefix).map_err(into_string)?;
+        self.folder_db
+            .get_public_folders_by_prefix_position(prefix)
+            .await
     }
 
     pub async fn exists_folder_by_id(&self, folder_id: &ObjectId) -> Result<bool> {
@@ -57,10 +67,12 @@ impl FolderService {
     }
 
     pub async fn exists_folder_by_fullpath(&self, fullpath: &str) -> Result<bool> {
+        check_dir(fullpath).map_err(into_string)?;
         self.folder_db.exists_folder_by_fullpath(fullpath).await
     }
 
     pub async fn exists_folder_by_position(&self, position: &str) -> Result<bool> {
+        check_dir(position).map_err(into_string)?;
         self.folder_db.exists_folder_by_position(position).await
     }
 

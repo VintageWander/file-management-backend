@@ -1,6 +1,6 @@
 use futures::TryStreamExt;
-use mongodb::bson::doc;
 use mongodb::bson::oid::ObjectId;
+use mongodb::bson::{doc, Regex};
 use mongodb::options::{FindOneAndUpdateOptions, ReturnDocument};
 use mongodb::{bson::Document, Collection};
 
@@ -62,8 +62,22 @@ impl FolderDB {
     }
 
     pub async fn get_folders_by_prefix_position(&self, prefix: &str) -> Result<Vec<Folder>> {
-        let position_regex = format!("/^{prefix}/");
+        let position_regex = format!("^{prefix}");
         self.get_folders_by(doc! {
+            "position": {
+                "$regex": position_regex
+            }
+        })
+        .await
+    }
+
+    pub async fn get_public_folders_by_prefix_position(&self, prefix: &str) -> Result<Vec<Folder>> {
+        let position_regex = Regex {
+            pattern: format!("^{prefix}"),
+            options: String::new(),
+        };
+        self.get_folders_by(doc! {
+            "visibility": "public",
             "position": {
                 "$regex": position_regex
             }
@@ -125,7 +139,7 @@ impl FolderDB {
         // fullpath for regex search
         // use new position to replace old position
 
-        let position_regex = mongodb::bson::Regex {
+        let position_regex = Regex {
             pattern: format!("^{old_fullpath}"),
             options: String::new(),
         };
@@ -191,7 +205,10 @@ impl FolderDB {
     }
 
     pub async fn delete_folders_by_prefix_position(&self, prefix: &str) -> Result<()> {
-        let position_regex = format!("/^{prefix}/");
+        let position_regex = Regex {
+            pattern: format!("^{prefix}"),
+            options: String::new(),
+        };
         self.collection
             .delete_many(doc! {"position": {"$regex": position_regex}}, None)
             .await?;
@@ -199,7 +216,10 @@ impl FolderDB {
     }
 
     pub async fn delete_folders_by_prefix_fullpath(&self, prefix: &str) -> Result<()> {
-        let fullpath_regex = format!("/^{prefix}/");
+        let fullpath_regex = Regex {
+            pattern: format!("^{prefix}"),
+            options: String::new(),
+        };
         self.collection
             .delete_many(doc! {"fullpath": {"$regex": fullpath_regex}}, None)
             .await?;

@@ -14,7 +14,14 @@ pub async fn get_public_folders_handler(
     depot: &mut Depot,
     res: &mut Response,
 ) -> WebResult {
-    let folders = get_folder_service(depot)?.get_public_folders().await?;
+    let folders = match req.query::<&str>("position") {
+        None => get_folder_service(depot)?.get_public_folders().await?,
+        Some(query) => {
+            get_folder_service(depot)?
+                .get_public_folders_by_prefix_position(query)
+                .await?
+        }
+    };
     let mut responses = vec![];
     for folder in folders {
         responses.push(folder.into_response()?)

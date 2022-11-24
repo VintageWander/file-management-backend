@@ -1,7 +1,7 @@
 use chrono::Utc;
 use futures::TryStreamExt;
-use mongodb::bson::doc;
 use mongodb::bson::oid::ObjectId;
+use mongodb::bson::{doc, Regex};
 use mongodb::options::{FindOneAndUpdateOptions, ReturnDocument};
 use mongodb::{bson::Document, Collection};
 
@@ -68,9 +68,24 @@ impl FileDB {
         self.get_file_by(doc! {"fullpath": fullpath}).await
     }
 
-    pub async fn get_file_by_prefix_position(&self, prefix: &str) -> Result<File> {
-        let position_regex = format!("/^{prefix}/");
-        self.get_file_by(doc! {
+    pub async fn get_files_by_prefix_position(&self, prefix: &str) -> Result<Vec<File>> {
+        let position_regex = Regex {
+            pattern: format!("^{prefix}"),
+            options: String::new(),
+        };
+        self.get_files_by(doc! {
+            "position": {"$regex": position_regex}
+        })
+        .await
+    }
+
+    pub async fn get_public_files_by_prefix_position(&self, prefix: &str) -> Result<Vec<File>> {
+        let position_regex = Regex {
+            pattern: format!("^{prefix}"),
+            options: String::new(),
+        };
+        self.get_files_by(doc! {
+            "visibility": "public",
             "position": {"$regex": position_regex}
         })
         .await
@@ -147,7 +162,7 @@ impl FileDB {
         // fullpath for regex search
         // use new position to replace old position
 
-        let position_regex = mongodb::bson::Regex {
+        let position_regex = Regex {
             pattern: format!("^{old_fullpath}"),
             options: String::new(),
         };
@@ -209,7 +224,10 @@ impl FileDB {
     }
 
     pub async fn delete_files_by_prefix_position(&self, prefix: &str) -> Result<()> {
-        let position_regex = format!("/^{prefix}/");
+        let position_regex = Regex {
+            pattern: format!("^{prefix}"),
+            options: String::new(),
+        };
         self.collection
             .delete_many(
                 doc! {
@@ -221,7 +239,10 @@ impl FileDB {
     }
 
     pub async fn delete_files_by_prefix_fullpath(&self, prefix: &str) -> Result<()> {
-        let fullpath_regex = format!("/^{prefix}/");
+        let fullpath_regex = Regex {
+            pattern: format!("^{prefix}"),
+            options: String::new(),
+        };
         self.collection
             .delete_many(
                 doc! {

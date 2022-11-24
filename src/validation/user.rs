@@ -11,5 +11,9 @@ pub fn check_username(username: &str) -> Result<(), ValidationError> {
 }
 
 pub fn check_password(password: &str) -> Result<(), ValidationError> {
-    check_with(password, r#"((?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*\W)).{8,}$"#, "Password must contains at least one lowercase, one uppercase, one digit, one special character, and at least 8 characters in length")
+    check_with(
+        password, 
+        r#"((?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*\W)).{8,}$"#,
+         "Password must contains at least one lowercase, one uppercase, one digit, one special character, and at least 8 characters in length"
+    )
 }
