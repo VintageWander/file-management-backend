@@ -3,7 +3,9 @@ use salvo::{handler, Depot, Request, Response};
 use crate::{
     error::Error,
     helper::{
-        body::extract_from_body, cookie::get_cookie_user_id, depot::get_folder_service,
+        body::extract_from_body,
+        cookie::get_cookie_user_id,
+        depot::{get_folder_service, get_user_service},
         param::get_param_folder_id,
     },
     request::folder::update::UpdateFolderRequest,
@@ -39,7 +41,12 @@ pub async fn update_folder_handler(
         ));
     }
 
-    let folder_model = folder_req.into_folder(cookie_user_id, old_folder)?;
+    // Get the cookie user
+    let cookie_user = get_user_service(depot)?
+        .get_user_by_id(cookie_user_id)
+        .await?;
+
+    let folder_model = folder_req.into_folder(&cookie_user, old_folder)?;
 
     let updated_folder = folder_service
         .update_folder_by_id(&param_folder_id, folder_model)

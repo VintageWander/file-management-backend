@@ -21,13 +21,13 @@ impl FileVersionDB {
         }
     }
 
-    pub async fn get_all_by(&self, doc: Document) -> Result<Vec<FileVersion>> {
+    pub async fn get_versions_by(&self, doc: Document) -> Result<Vec<FileVersion>> {
         let file_versions = self.collection.find(doc, None).await?.try_collect().await?;
         Ok(file_versions)
     }
 
-    pub async fn get_all_by_file_id(&self, file_id: &ObjectId) -> Result<Vec<FileVersion>> {
-        self.get_all_by(doc! {"file": file_id }).await
+    pub async fn get_versions_by_file_id(&self, file_id: &ObjectId) -> Result<Vec<FileVersion>> {
+        self.get_versions_by(doc! {"file": file_id }).await
     }
 
     pub async fn get_version_by(&self, doc: Document) -> Result<FileVersion> {

@@ -2,8 +2,11 @@ use salvo::{handler, Depot, Request, Response};
 
 use crate::{
     helper::{
-        cookie::get_cookie_user_id_option, depot::get_folder_service, param::get_param_folder_id,
+        cookie::get_cookie_user_id_option,
+        depot::{get_folder_service, get_user_service},
+        param::get_param_folder_id,
     },
+    response::FinalFolderResponse,
     web::Web,
     WebResult,
 };
@@ -24,7 +27,16 @@ pub async fn get_public_folders_handler(
     };
     let mut responses = vec![];
     for folder in folders {
-        responses.push(folder.into_response()?)
+        let owner = folder.owner;
+        responses
+            .push(
+                FinalFolderResponse::new(
+                    folder, 
+                    get_user_service(depot)?
+                        .get_user_by_id(&owner)
+                        .await?
+                )?
+            )
     }
     Ok(Web::ok("Get public folders successfully", responses))
 }
@@ -41,17 +53,22 @@ pub async fn get_folder_by_id_handler(
 
     // Checks if the user is logged in or not
     let Some(cookie_user_id) = get_cookie_user_id_option(depot) else {
-        let file = folder_service
+        let folder = folder_service
             .get_public_folder_by_id(&param_folder_id)
             .await?;
-        return Ok(Web::ok("Get file by param success", file));
+        let owner = folder.owner;
+        return Ok(Web::ok("Get file by param success", 
+        FinalFolderResponse::new(folder, 
+            get_user_service(depot)?.get_user_by_id(&owner).await?
+        )?
+    ));
     };
 
     // If the user is logged in, and it matches with the owner of the file, return that folder
     // Else, still return that folder but only if it is public
-    let file = folder_service.get_folder_by_id(&param_folder_id).await?;
-    let file = match *cookie_user_id == file.owner {
-        true => file,
+    let folder = folder_service.get_folder_by_id(&param_folder_id).await?;
+    let folder = match *cookie_user_id == folder.owner {
+        true => folder,
         false => {
             folder_service
                 .get_public_folder_by_id(&param_folder_id)
@@ -59,5 +76,13 @@ pub async fn get_folder_by_id_handler(
         }
     };
 
-    Ok(Web::ok("Get file by param success", ()))
+    Ok(Web::ok(
+        "Get file by param success",
+        FinalFolderResponse::new(
+            folder,
+            get_user_service(depot)?
+                .get_user_by_id(cookie_user_id)
+                .await?,
+        )?,
+    ))
 }

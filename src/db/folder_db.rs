@@ -139,7 +139,7 @@ impl FolderDB {
         // fullpath for regex search
         // use new position to replace old position
 
-        let position_regex = Regex {
+        let position_regex = &Regex {
             pattern: format!("^{old_fullpath}"),
             options: String::new(),
         };
@@ -148,7 +148,7 @@ impl FolderDB {
             .update_many(
                 doc! {
                     "position": {
-                        "$regex": position_regex.clone()
+                        "$regex": position_regex
                     },
                     "fullpath": {
                         "$regex": position_regex

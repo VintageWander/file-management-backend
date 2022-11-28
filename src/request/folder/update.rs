@@ -3,7 +3,10 @@ use serde::{Deserialize, Serialize};
 use validator::Validate;
 
 use crate::{
-    base::folder::{Folder, Visibility},
+    base::{
+        folder::{Folder, Visibility},
+        user::User,
+    },
     validation::file::{check_dir, check_folder_name, check_visibility},
     Result,
 };
@@ -20,7 +23,7 @@ pub struct UpdateFolderRequest {
 }
 
 impl UpdateFolderRequest {
-    pub fn into_folder(self, owner: &ObjectId, old_folder: Folder) -> Result<Folder> {
+    pub fn into_folder(self, owner: &User, old_folder: Folder) -> Result<Folder> {
         self.validate()?;
 
         let visibility = match self.visibility {

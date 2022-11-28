@@ -3,10 +3,13 @@ use tokio::{fs::File, io::AsyncReadExt};
 
 use crate::{
     helper::{
-        cookie::get_cookie_user_id, depot::get_file_service, file::get_file_from_req,
+        cookie::get_cookie_user_id,
+        depot::{get_file_service, get_user_service},
+        file::get_file_from_req,
         form::extract_from_form,
     },
     request::file::create::CreateFileRequest,
+    response::FinalFileResponse,
     web::Web,
     WebResult,
 };
@@ -42,16 +45,21 @@ pub async fn create_file_handler(
         .name()
         .ok_or("The attached file does not have a name")?;
 
+    // Find the user
+    let cookie_user = get_user_service(depot)?
+        .get_user_by_id(cookie_user_id)
+        .await?;
+
     // Construct the file model from request
-    let file_model = file_req.into_file(cookie_user_id, full_filename)?;
+    let file_model = file_req.into_file(&cookie_user, full_filename)?;
 
     // Send the file_model and the file_stream to the database to create a new file model
     // with the file stream send straight to S3
-    let created_file = file_service
-        .create_file(file_model, file_stream)
-        .await?
-        .into_response()?;
+    let created_file = file_service.create_file(file_model, file_stream).await?;
 
     // Return back the created file
-    Ok(Web::ok("Create file successfully", created_file))
+    Ok(Web::ok(
+        "Create file successfully",
+        FinalFileResponse::new(created_file, cookie_user, vec![])?,
+    ))
 }

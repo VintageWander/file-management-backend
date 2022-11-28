@@ -1,5 +1,8 @@
 use crate::{
-    base::file::{File, Visibility},
+    base::{
+        file::{File, Visibility},
+        user::User,
+    },
     helper::into_string,
     validation::file::{check_dir, check_full_filename, check_visibility},
     Result,
@@ -18,7 +21,7 @@ pub struct CreateFileRequest {
 }
 
 impl CreateFileRequest {
-    pub fn into_file(self, owner: &ObjectId, full_filename: &str) -> Result<File> {
+    pub fn into_file(self, owner: &User, full_filename: &str) -> Result<File> {
         self.validate()?;
         check_full_filename(full_filename).map_err(into_string)?;
 

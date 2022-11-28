@@ -1,7 +1,11 @@
 use salvo::{handler, Depot, Request, Response};
 
 use crate::{
-    helper::{body::extract_from_body, cookie::get_cookie_user_id, depot::get_folder_service},
+    helper::{
+        body::extract_from_body,
+        cookie::get_cookie_user_id,
+        depot::{get_folder_service, get_user_service},
+    },
     request::folder::create::CreateFolderRequest,
     web::Web,
     WebResult,
@@ -22,7 +26,12 @@ pub async fn create_folder_handler(
     // Get the file service
     let folder_service = get_folder_service(depot)?;
 
-    let folder_model = folder_req.into_folder(cookie_user_id)?;
+    // Get the cookie user
+    let cookie_user = get_user_service(depot)?
+        .get_user_by_id(cookie_user_id)
+        .await?;
+
+    let folder_model = folder_req.into_folder(&cookie_user)?;
 
     let created_folder = folder_service
         .create_folder(folder_model)

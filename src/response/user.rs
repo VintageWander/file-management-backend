@@ -2,9 +2,13 @@ use serde::{Deserialize, Serialize};
 use validator::Validate;
 
 use crate::base::file::File;
+use crate::base::folder::Folder;
 use crate::base::user::User;
 use crate::validation::user::check_username;
 use crate::Result;
+
+use super::file::FileResponse;
+use super::folder::FolderResponse;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Validate)]
 pub struct UserResponse {
@@ -45,17 +49,31 @@ impl UserResponse {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Validate)]
-pub struct UserWithFileResponse {
-    pub id: String,
+#[derive(Deserialize, Serialize)]
+pub struct FinalUserResponse {
+    #[serde(flatten)]
+    pub user: UserResponse,
+    pub files: Vec<FileResponse>,
+    pub folders: Vec<FolderResponse>,
+}
 
-    #[validate(custom = "check_username")]
-    pub username: String,
-    #[validate(email(message = "The email must be in correct form"))]
-    pub email: String,
+impl FinalUserResponse {
+    pub fn new(user: User, files: Vec<File>, folders: Vec<Folder>) -> Result<Self> {
+        let files = files
+            .into_iter()
+            .map(|f| f.into_response())
+            .collect::<Result<_>>()?;
 
-    pub files: Vec<File>,
+        let folders = folders
+            .into_iter()
+            .filter(|f| f.folder_name != user.username)
+            .map(|f| f.into_response())
+            .collect::<Result<_>>()?;
 
-    pub created_at: i64,
-    pub updated_at: i64,
+        Ok(Self {
+            user: user.into_response()?,
+            files,
+            folders,
+        })
+    }
 }

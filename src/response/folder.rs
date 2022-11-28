@@ -2,10 +2,12 @@ use serde::{Deserialize, Serialize};
 use validator::Validate;
 
 use crate::{
-    base::folder::Folder,
+    base::{folder::Folder, user::User},
     validation::file::{check_dir, check_folder_name, check_visibility},
     Result,
 };
+
+use super::user::UserResponse;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Validate)]
 #[serde(rename_all = "camelCase")]
@@ -46,5 +48,21 @@ impl FolderResponse {
 
         folder_res.validate()?;
         Ok(folder_res)
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct FinalFolderResponse {
+    #[serde(flatten)]
+    pub folder: FolderResponse,
+    pub owner: UserResponse,
+}
+
+impl FinalFolderResponse {
+    pub fn new(folder: Folder, owner: User) -> Result<Self> {
+        Ok(Self {
+            folder: folder.into_response()?,
+            owner: owner.into_response()?,
+        })
     }
 }

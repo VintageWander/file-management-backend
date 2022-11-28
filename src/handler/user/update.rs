@@ -9,7 +9,7 @@ use crate::{
         param::get_param_user_id,
     },
     request::user::update::UpdateUserRequest,
-    response::Response,
+    response::FinalUserResponse,
     web::Web,
     WebResult,
 };
@@ -53,6 +53,6 @@ pub async fn update_user_handler(req: &mut Request, depot: &Depot) -> WebResult 
 
     Ok(Web::ok(
         "Update user successfully",
-        Response::new(changed_user, files, folders)?,
+        FinalUserResponse::new(changed_user, files, folders)?,
     ))
 }

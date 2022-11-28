@@ -50,7 +50,7 @@ pub fn check_fullpath(fullpath: &str) -> Result<(), ValidationError> {
     // This will reject cases like hello/.txt, hello/world, or even hello/
     check_with(
         fullpath,
-        r#"^(([a-zA-Z0-9-_]{3,}[/])+)[a-zA-Z0-9-_]{3,}\.(png|txt|jpg|jpeg|mp3)$"#,
+        r#"^(([a-zA-Z0-9-_]{3,}[/])*)[a-zA-Z0-9-_]{3,}\.(png|txt|jpg|jpeg|mp3)$"#,
         "The fullpath is incorrect",
     )
 }
@@ -65,7 +65,7 @@ pub fn check_version_path(version_path: &str) -> Result<(), ValidationError> {
     // user-version-db/123.txt
     check_with(
         version_path,
-        r#"^[a-zA-Z0-9-_]{3,}(-version-db)[/](([a-zA-Z0-9-_]{3,}[/])+)[0-9]{3,}\.(png|txt|jpg|jpeg|mp3)$"#,
+        r#"^[a-zA-Z0-9-_]{3,}(-version-db)[/](([a-zA-Z0-9-_]{3,}[/])*)[0-9]{3,}\.(png|txt|jpg|jpeg|mp3)$"#,
         "The version path is invalid",
     )
 }
@@ -73,7 +73,7 @@ pub fn check_version_path(version_path: &str) -> Result<(), ValidationError> {
 pub fn check_version_folder(version_folder: &str) -> Result<(), ValidationError> {
     check_with(
         version_folder,
-        r#"^[a-zA-Z0-9-_]{3,}(-version-db)[/](([a-zA-Z0-9-_]{3,}[/])+)$"#,
+        r#"^[a-zA-Z0-9-_]{3,}(-version-db)[/](([a-zA-Z0-9-_]{3,}[/])*)$"#,
         "The version folder is invalid",
     )
 }

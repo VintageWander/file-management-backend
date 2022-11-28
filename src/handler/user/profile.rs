@@ -5,7 +5,7 @@ use crate::{
         cookie::get_cookie_user_id,
         depot::{get_file_service, get_folder_service, get_user_service},
     },
-    response::Response,
+    response::FinalUserResponse,
     web::Web,
     WebResult,
 };
@@ -29,6 +29,6 @@ pub async fn profile_handler(depot: &Depot) -> WebResult {
 
     Ok(Web::ok(
         "Profile info successfully retrieved",
-        Response::new(user, files, folders)?,
+        FinalUserResponse::new(user, files, folders)?,
     ))
 }

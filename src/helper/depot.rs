@@ -2,7 +2,8 @@ use salvo::Depot;
 
 use crate::{
     service::{
-        file_service::FileService, folder_service::FolderService, user_service::UserService,
+        file_service::FileService, file_version_service::FileVersionService,
+        folder_service::FolderService, user_service::UserService,
     },
     Result,
 };
@@ -33,4 +34,8 @@ pub fn get_file_service(depot: &Depot) -> Result<&FileService> {
 
 pub fn get_folder_service(depot: &Depot) -> Result<&FolderService> {
     extract_from_depot(depot, "folder_service")
+}
+
+pub fn get_file_version_service(depot: &Depot) -> Result<&FileVersionService> {
+    extract_from_depot(depot, "file_version_service")
 }

@@ -3,7 +3,7 @@ use salvo::{handler, Depot, Request};
 
 use crate::helper::cookie::get_cookie_user_id_option;
 use crate::helper::depot::{get_file_service, get_folder_service};
-use crate::response::Response;
+use crate::response::FinalUserResponse;
 use crate::{
     helper::{depot::get_user_service, param::get_param_user_id},
     web::Web,
@@ -67,7 +67,7 @@ pub async fn get_user_handler(req: &mut Request, depot: &mut Depot) -> WebResult
 
     Ok(Web::ok(
         "Get user by id successfully",
-        Response::new(
+        FinalUserResponse::new(
             user_service.get_user_by_id(&param_user_id).await?,
             files,
             folders,
