@@ -8,7 +8,8 @@ use db::{
 use dotenv::dotenv;
 use salvo::{affix, cors::Cors, prelude::TcpListener, size_limiter::max_size, Router, Server};
 use service::{
-    file_service::FileService, folder_service::FolderService, user_service::UserService,
+    file_service::FileService, file_version_service::FileVersionService,
+    folder_service::FolderService, user_service::UserService,
 };
 use web::Web;
 
@@ -42,6 +43,7 @@ async fn main() -> Result<()> {
     let user_service = UserService::init(&user_db, &file_db, &folder_db, &s3);
     let file_service = FileService::init(&file_db, &folder_db, &file_version_db, &s3);
     let folder_service = FolderService::init(&file_db, &folder_db, &s3);
+    let file_version_service = FileVersionService::init(&file_version_db, &s3);
 
     let cors_builder = Cors::builder()
         .allow_credentials(true)
@@ -54,7 +56,8 @@ async fn main() -> Result<()> {
         .hoop(
             affix::insert("user_service", user_service)
                 .insert("folder_service", folder_service)
-                .insert("file_service", file_service),
+                .insert("file_service", file_service)
+                .insert("file_version_service", file_version_service),
         )
         .hoop(max_size(1024 * 1024 * 100)) // limit to 100MBs per request
         .push(routes::routes());
