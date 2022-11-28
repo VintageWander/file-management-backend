@@ -1,10 +1,11 @@
-use salvo::{handler, Depot, Request, Response};
+use salvo::{handler, Depot, Request};
 use tokio::{fs::File, io::AsyncReadExt};
 
 use crate::{
+    error::Error,
     helper::{
-        cookie::get_cookie_user_id,
-        depot::{get_file_service, get_file_version_service, get_param_file, get_user_service},
+        cookie::get_cookie_user,
+        depot::{get_file_service, get_file_version_service, get_param_file},
         file::get_file_from_req_option,
         form::extract_from_form,
     },
@@ -15,13 +16,8 @@ use crate::{
 };
 
 #[handler]
-pub async fn update_file_handler(
-    req: &mut Request,
-    depot: &mut Depot,
-    res: &mut Response,
-) -> WebResult {
+pub async fn update_file_handler(req: &mut Request, depot: &mut Depot) -> WebResult {
     // Checks if the user has logged in or not
-    let cookie_user_id = get_cookie_user_id(depot)?;
 
     // Extract the data from request
     let file_req = extract_from_form::<UpdateFileRequest>(req).await?;
@@ -29,16 +25,17 @@ pub async fn update_file_handler(
     // Get the file db
     let file_service = get_file_service(depot)?;
 
-    // // Get the file id from param
-    // let param_file_id = get_param_file_id(req)?;
-
     // Get the old file
     let old_file = get_param_file(depot)?;
 
     // Get the cookie_user
-    let cookie_user = get_user_service(depot)?
-        .get_user_by_id(cookie_user_id)
-        .await?;
+    let cookie_user = get_cookie_user(depot)?;
+
+    if cookie_user.id != old_file.owner {
+        return Err(Error::Permissions(
+            "You cannot update other user's file".into(),
+        ));
+    }
 
     // Get the attachment file
     // Since this is optional, I have deal with 2 cases
@@ -62,7 +59,7 @@ pub async fn update_file_handler(
             let full_filename = file.name();
 
             // Construct the file model from request
-            let file_model = file_req.into_file(full_filename, old_file.clone(), &cookie_user)?;
+            let file_model = file_req.into_file(full_filename, old_file.clone(), cookie_user)?;
 
             // Send the file model to the database
             let updated_file = file_service
@@ -75,7 +72,7 @@ pub async fn update_file_handler(
                 "Update file successfully",
                 FinalFileResponse::new(
                     updated_file,
-                    cookie_user,
+                    cookie_user.clone(),
                     get_file_version_service(depot)?
                         .get_versions_by_file_id(&updated_file_id)
                         .await?,
@@ -85,7 +82,7 @@ pub async fn update_file_handler(
         // If there is no file
         None => {
             // Construct a file model
-            let file_model = file_req.into_file(None, old_file.clone(), &cookie_user)?;
+            let file_model = file_req.into_file(None, old_file.clone(), cookie_user)?;
             // Send the information to the database
             // Without the file ( vec![] )
             let updated_file = file_service
@@ -97,7 +94,7 @@ pub async fn update_file_handler(
                 "Update file successfully",
                 FinalFileResponse::new(
                     updated_file,
-                    cookie_user,
+                    cookie_user.clone(),
                     get_file_version_service(depot)?
                         .get_versions_by_file_id(&updated_file_id)
                         .await?,

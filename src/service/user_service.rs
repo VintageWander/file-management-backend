@@ -3,7 +3,7 @@ use mongodb::bson::oid::ObjectId;
 use crate::{
     aws::S3,
     base::{folder::Folder, user::User},
-    db::{file_db::FileDB, folder_db::FolderDB, user_db::UserDB},
+    db::{file_db::FileDB, file_version_db::FileVersionDB, folder_db::FolderDB, user_db::UserDB},
     Result,
 };
 
@@ -12,15 +12,23 @@ pub struct UserService {
     user_db: UserDB,
     file_db: FileDB,
     folder_db: FolderDB,
+    file_version_db: FileVersionDB,
     storage: S3,
 }
 
 impl UserService {
-    pub fn init(user_db: &UserDB, file_db: &FileDB, folder_db: &FolderDB, storage: &S3) -> Self {
+    pub fn init(
+        user_db: &UserDB,
+        file_db: &FileDB,
+        folder_db: &FolderDB,
+        file_verion_db: &FileVersionDB,
+        storage: &S3,
+    ) -> Self {
         Self {
             user_db: user_db.clone(),
             file_db: file_db.clone(),
             folder_db: folder_db.clone(),
+            file_version_db: file_verion_db.clone(),
             storage: storage.clone(),
         }
     }
@@ -74,14 +82,6 @@ impl UserService {
         let new_user = self.user_db.create_user(user).await?;
         let root_folder = Folder::new_root(&new_user)?;
 
-        // self.storage
-        //     .create_folder(&format!("{}/", root_folder.owner))
-        //     .await?;
-
-        // self.storage
-        //     .create_folder(&format!("{}-version-db/", &root_folder.owner))
-        //     .await?;
-
         self.folder_db.create_folder(root_folder).await?;
 
         Ok(new_user)
@@ -123,6 +123,10 @@ impl UserService {
             let internal_full_filename = &format!("{}.{}", file.id, file.extension_to_str());
             let internal_file_version_path = &format!("{}/", file.id);
 
+            self.file_version_db
+                .delete_versions_by_file_id(&file.id)
+                .await?;
+
             self.storage.delete_file(internal_full_filename).await?;
             self.storage
                 .delete_folder(internal_file_version_path)
@@ -133,13 +137,6 @@ impl UserService {
         self.folder_db
             .delete_folders_by_owner(&deleted_user.id)
             .await?;
-
-        // self.storage
-        //     .delete_folder(&format!("{}/", deleted_user.id))
-        //     .await?;
-        // self.storage
-        //     .delete_folder(&format!("{}-version-db/", deleted_user.id))
-        //     .await?;
 
         Ok(())
     }

@@ -37,6 +37,7 @@ pub fn get_public_files_route() -> Router {
 pub fn get_file_route() -> Router {
     Router::with_path("<param_file_id>")
         .hoop(check_login_middleware)
+        .hoop(get_file_by_id_middleware)
         .get(get_file_by_id_handler)
 }
 
@@ -47,53 +48,42 @@ pub fn create_file_route() -> Router {
 }
 
 pub fn update_file_route() -> Router {
-    Router::with_path("update")
-        .path("<param_file_id>")
+    Router::with_path("update/<param_file_id>")
         .hoop(check_login_middleware)
         .hoop(get_file_by_id_middleware)
         .put(update_file_handler)
 }
 
 pub fn delete_file_route() -> Router {
-    Router::with_path("delete")
-        .path("<param_file_id>")
+    Router::with_path("delete/<param_file_id>")
         .hoop(check_login_middleware)
         .hoop(get_file_by_id_middleware)
         .delete(delete_file_handler)
 }
 
 pub fn get_file_versions_route() -> Router {
-    Router::with_path("<param_file_id>")
-        .path("versions")
+    Router::with_path("<param_file_id>/versions")
         .hoop(check_login_middleware)
         .hoop(get_file_by_id_middleware)
         .get(get_versions_handler)
 }
 
 pub fn get_file_version_route() -> Router {
-    Router::with_path("<param_file_id>")
-        .path("versions")
-        .path("<version_number>")
+    Router::with_path("<param_file_id>/versions/<version_number>")
         .hoop(check_login_middleware)
         .hoop(get_file_by_id_middleware)
         .get(get_version_handler)
 }
 
 pub fn restore_file_route() -> Router {
-    Router::with_path("<param_file_id>")
-        .path("versions")
-        .path("restore")
-        .path("<version_number>")
+    Router::with_path("<param_file_id>/versions/restore/<version_number>")
         .hoop(check_login_middleware)
         .hoop(get_file_by_id_middleware)
         .put(restore_file_handler)
 }
 
 pub fn delete_version_route() -> Router {
-    Router::with_path("<param_file_id>")
-        .path("versions")
-        .path("delete")
-        .path("<version_number>")
+    Router::with_path("<param_file_id>/versions/delete/<version_number>")
         .hoop(check_login_middleware)
         .hoop(get_file_by_id_middleware)
         .delete(delete_file_version_handler)

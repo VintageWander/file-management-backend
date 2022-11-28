@@ -1,18 +1,18 @@
-use salvo::{handler, Depot, Request, Response};
+use salvo::{handler, Depot, Request};
 
 use crate::{
     error::Error,
-    helper::{cookie::get_cookie_user_id, depot::get_folder_service, param::get_param_folder_id},
+    helper::{
+        cookie::get_cookie_user_id,
+        depot::{get_folder_service, get_param_folder},
+        param::get_param_folder_id,
+    },
     web::Web,
     WebResult,
 };
 
 #[handler]
-pub async fn delete_folder_handler(
-    req: &mut Request,
-    depot: &Depot,
-    res: &mut Response,
-) -> WebResult {
+pub async fn delete_folder_handler(req: &mut Request, depot: &Depot) -> WebResult {
     // First we need to get the folder from param, and then check the owner
     // Then compare it against the logged in user
     // If they match then we can delete the folder
@@ -27,7 +27,7 @@ pub async fn delete_folder_handler(
     let param_folder_id = get_param_folder_id(req)?;
 
     // Get the folder from the storage
-    let param_folder = folder_service.get_folder_by_id(&param_folder_id).await?;
+    let param_folder = get_param_folder(depot)?;
 
     // If the owners doesn't match
     if *cookie_user_id != param_folder.owner {
@@ -39,7 +39,7 @@ pub async fn delete_folder_handler(
 
     // Else just delete the folder
     folder_service
-        .delete_folder_by_id(&param_folder_id, cookie_user_id)
+        .delete_folder_by_id_owner(&param_folder_id, cookie_user_id)
         .await?;
 
     Ok(Web::ok("Folder deleted", ()))

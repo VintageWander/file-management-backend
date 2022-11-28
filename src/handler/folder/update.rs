@@ -1,11 +1,11 @@
-use salvo::{handler, Depot, Request, Response};
+use salvo::{handler, Depot, Request};
 
 use crate::{
     error::Error,
     helper::{
         body::extract_from_body,
-        cookie::get_cookie_user_id,
-        depot::{get_folder_service, get_user_service},
+        cookie::get_cookie_user,
+        depot::{get_folder_service, get_param_folder},
         param::get_param_folder_id,
     },
     request::folder::update::UpdateFolderRequest,
@@ -17,10 +17,10 @@ use crate::{
 pub async fn update_folder_handler(
     req: &mut Request,
     depot: &mut Depot,
-    res: &mut Response,
+    // res: &mut Response,
 ) -> WebResult {
     // Checks if the user has logged in or not
-    let cookie_user_id = get_cookie_user_id(depot)?;
+    // let cookie_user_id = get_cookie_user_id(depot)?;
 
     // Extract the data from request
     let folder_req = extract_from_body::<UpdateFolderRequest>(req).await?;
@@ -32,21 +32,18 @@ pub async fn update_folder_handler(
     let param_folder_id = get_param_folder_id(req)?;
 
     // Get the old folder
-    let old_folder = folder_service.get_folder_by_id(&param_folder_id).await?;
+    let old_folder = get_param_folder(depot)?;
 
-    // Check if we have permission to change the folder
-    if old_folder.owner != *cookie_user_id {
+    // Get the cookie user
+    let cookie_user = get_cookie_user(depot)?;
+
+    if cookie_user.id != old_folder.owner {
         return Err(Error::Permissions(
-            "You're not the author of the folder".into(),
+            "You cannot update other user's folder".into(),
         ));
     }
 
-    // Get the cookie user
-    let cookie_user = get_user_service(depot)?
-        .get_user_by_id(cookie_user_id)
-        .await?;
-
-    let folder_model = folder_req.into_folder(&cookie_user, old_folder)?;
+    let folder_model = folder_req.into_folder(cookie_user, old_folder.clone())?;
 
     let updated_folder = folder_service
         .update_folder_by_id(&param_folder_id, folder_model)

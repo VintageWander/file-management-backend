@@ -1,4 +1,4 @@
-use salvo::{handler, Depot, Request, Response};
+use salvo::{handler, Depot, Request};
 
 use crate::{
     helper::{
@@ -12,11 +12,7 @@ use crate::{
 };
 
 #[handler]
-pub async fn restore_file_handler(
-    req: &mut Request,
-    depot: &mut Depot,
-    res: &mut Response,
-) -> WebResult {
+pub async fn restore_file_handler(req: &mut Request, depot: &mut Depot) -> WebResult {
     // Check if the user is logged in or not
     let cookie_user_id = get_cookie_user_id(depot)?;
 

@@ -1,11 +1,9 @@
-use salvo::{handler, Depot, Request, Response};
+use salvo::{handler, Depot, Request};
 use tokio::{fs::File, io::AsyncReadExt};
 
 use crate::{
     helper::{
-        cookie::get_cookie_user_id,
-        depot::{get_file_service, get_user_service},
-        file::get_file_from_req,
+        cookie::get_cookie_user, depot::get_file_service, file::get_file_from_req,
         form::extract_from_form,
     },
     request::file::create::CreateFileRequest,
@@ -15,14 +13,7 @@ use crate::{
 };
 
 #[handler]
-pub async fn create_file_handler(
-    req: &mut Request,
-    depot: &mut Depot,
-    res: &mut Response,
-) -> WebResult {
-    // Checks if the user has logged in or not
-    let cookie_user_id = get_cookie_user_id(depot)?;
-
+pub async fn create_file_handler(req: &mut Request, depot: &mut Depot) -> WebResult {
     // Extract the data from request
     let file_req = extract_from_form::<CreateFileRequest>(req).await?;
 
@@ -46,12 +37,10 @@ pub async fn create_file_handler(
         .ok_or("The attached file does not have a name")?;
 
     // Find the user
-    let cookie_user = get_user_service(depot)?
-        .get_user_by_id(cookie_user_id)
-        .await?;
+    let cookie_user = get_cookie_user(depot)?;
 
     // Construct the file model from request
-    let file_model = file_req.into_file(&cookie_user, full_filename)?;
+    let file_model = file_req.into_file(cookie_user, full_filename)?;
 
     // Send the file_model and the file_stream to the database to create a new file model
     // with the file stream send straight to S3
@@ -60,6 +49,6 @@ pub async fn create_file_handler(
     // Return back the created file
     Ok(Web::ok(
         "Create file successfully",
-        FinalFileResponse::new(created_file, cookie_user, vec![])?,
+        FinalFileResponse::new(created_file, cookie_user.clone(), vec![])?,
     ))
 }

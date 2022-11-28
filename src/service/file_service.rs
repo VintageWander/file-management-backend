@@ -161,7 +161,7 @@ impl FileService {
             let file_version_path = format!("{}/{}.{}", file.id, version, file.extension_to_str());
 
             self.version_db
-                .create_version_with_file_id(file_id, FileVersion::new(&file, version, None))
+                .create_version_with_file_id(FileVersion::new(&file, version, None))
                 .await?;
 
             let internal_full_filename = &format!("{}.{}", file.id, file.extension_to_str());
@@ -226,7 +226,7 @@ impl FileService {
         // The previous file the we just moved in, is itself a version
         // Create a new version model with the versioning database
         self.version_db
-            .create_version_with_file_id(file_id, FileVersion::new(&file, new_version, None))
+            .create_version_with_file_id(FileVersion::new(&file, new_version, None))
             .await?;
 
         // Delete the old backup

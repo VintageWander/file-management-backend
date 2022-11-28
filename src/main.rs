@@ -40,7 +40,7 @@ async fn main() -> Result<()> {
     let s3 = S3::init()?;
     let file_version_db = FileVersionDB::init(&db);
 
-    let user_service = UserService::init(&user_db, &file_db, &folder_db, &s3);
+    let user_service = UserService::init(&user_db, &file_db, &folder_db, &file_version_db, &s3);
     let file_service = FileService::init(&file_db, &folder_db, &file_version_db, &s3);
     let folder_service = FolderService::init(&file_db, &folder_db, &s3);
     let file_version_service = FileVersionService::init(&file_version_db, &s3);
@@ -57,7 +57,8 @@ async fn main() -> Result<()> {
             affix::insert("user_service", user_service)
                 .insert("folder_service", folder_service)
                 .insert("file_service", file_service)
-                .insert("file_version_service", file_version_service),
+                .insert("file_version_service", file_version_service)
+                .insert("storage", s3),
         )
         .hoop(max_size(1024 * 1024 * 100)) // limit to 100MBs per request
         .push(routes::routes());

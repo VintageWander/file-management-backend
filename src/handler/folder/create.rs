@@ -1,24 +1,15 @@
-use salvo::{handler, Depot, Request, Response};
+use salvo::{handler, Depot, Request};
 
 use crate::{
-    helper::{
-        body::extract_from_body,
-        cookie::get_cookie_user_id,
-        depot::{get_folder_service, get_user_service},
-    },
+    helper::{body::extract_from_body, cookie::get_cookie_user, depot::get_folder_service},
     request::folder::create::CreateFolderRequest,
     web::Web,
     WebResult,
 };
 
 #[handler]
-pub async fn create_folder_handler(
-    req: &mut Request,
-    depot: &mut Depot,
-    res: &mut Response,
-) -> WebResult {
+pub async fn create_folder_handler(req: &mut Request, depot: &mut Depot) -> WebResult {
     // Checks if the user has logged in or not
-    let cookie_user_id = get_cookie_user_id(depot)?;
 
     // Extract the data from request
     let folder_req = extract_from_body::<CreateFolderRequest>(req).await?;
@@ -27,11 +18,9 @@ pub async fn create_folder_handler(
     let folder_service = get_folder_service(depot)?;
 
     // Get the cookie user
-    let cookie_user = get_user_service(depot)?
-        .get_user_by_id(cookie_user_id)
-        .await?;
+    let cookie_user = get_cookie_user(depot)?;
 
-    let folder_model = folder_req.into_folder(&cookie_user)?;
+    let folder_model = folder_req.into_folder(cookie_user)?;
 
     let created_folder = folder_service
         .create_folder(folder_model)

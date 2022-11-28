@@ -49,15 +49,13 @@ pub fn create_user_route() -> Router {
 }
 
 pub fn update_user_route() -> Router {
-    Router::with_path("update")
-        .path("<param_user_id>")
+    Router::with_path("update/<param_user_id>")
         .hoop(check_login_middleware)
         .put(update_user_handler)
 }
 
 pub fn delete_user_route() -> Router {
-    Router::with_path("delete")
-        .path("<param_user_id>")
+    Router::with_path("delete/<param_user_id>")
         .hoop(check_login_middleware)
         .delete(delete_user_handler)
 }

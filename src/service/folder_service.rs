@@ -41,6 +41,16 @@ impl FolderService {
         self.folder_db.get_folder_by_id(folder_id).await
     }
 
+    pub async fn get_folder_by_id_owner(
+        &self,
+        folder_id: &ObjectId,
+        owner: &ObjectId,
+    ) -> Result<Folder> {
+        self.folder_db
+            .get_folder_by_id_owner(folder_id, owner)
+            .await
+    }
+
     pub async fn get_public_folder_by_id(&self, folder_id: &ObjectId) -> Result<Folder> {
         self.folder_db.get_public_folder_by_id(folder_id).await
     }
@@ -137,7 +147,11 @@ impl FolderService {
         Ok(updated_folder)
     }
 
-    pub async fn delete_folder_by_id(&self, folder_id: &ObjectId, owner: &ObjectId) -> Result<()> {
+    pub async fn delete_folder_by_id_owner(
+        &self,
+        folder_id: &ObjectId,
+        owner: &ObjectId,
+    ) -> Result<()> {
         // Edge case: Cannot let the user delete the root folder
         let folder_to_delete = self.get_folder_by_id(folder_id).await?;
         if folder_to_delete.folder_name == owner.to_string() {

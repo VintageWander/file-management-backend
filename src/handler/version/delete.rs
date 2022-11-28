@@ -1,9 +1,9 @@
-use salvo::{handler, Depot, Request, Response};
+use salvo::{handler, Depot, Request};
 
 use crate::{
     helper::{
         cookie::get_cookie_user_id,
-        depot::{get_file_service, get_file_version_service, get_param_file, get_user_service},
+        depot::{get_file_version_service, get_param_file, get_user_service},
         param::get_param_version_number,
     },
     response::FinalFileResponse,
@@ -12,11 +12,7 @@ use crate::{
 };
 
 #[handler]
-pub async fn delete_file_version_handler(
-    req: &mut Request,
-    depot: &mut Depot,
-    res: &mut Response,
-) -> WebResult {
+pub async fn delete_file_version_handler(req: &mut Request, depot: &mut Depot) -> WebResult {
     // Check if the user is logged in or not
     let cookie_user_id = get_cookie_user_id(depot)?;
 
@@ -25,7 +21,6 @@ pub async fn delete_file_version_handler(
 
     let param_file = get_param_file(depot)?;
 
-    let file_service = get_file_service(depot)?;
     let file_version_service = get_file_version_service(depot)?;
 
     // After that check is complete

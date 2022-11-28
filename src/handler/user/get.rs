@@ -11,7 +11,7 @@ use crate::{
 };
 
 #[handler]
-pub async fn get_users_handler(req: &mut Request, depot: &mut Depot) -> WebResult {
+pub async fn get_users_handler(depot: &mut Depot) -> WebResult {
     // Get the user_db from depot
     let user_service = get_user_service(depot)?;
 
