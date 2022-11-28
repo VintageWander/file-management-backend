@@ -98,10 +98,7 @@ impl FolderService {
         }
 
         let folder = self.folder_db.create_folder(folder).await?;
-        // let version_folder_fullpath = convert_folder_to_version(&folder.fullpath)?;
 
-        // self.storage.create_folder(&folder.fullpath).await?;
-        // self.storage.create_folder(&version_folder_fullpath).await?;
         Ok(folder)
     }
 
@@ -130,17 +127,6 @@ impl FolderService {
             self.file_db
                 .move_inner_files(&old_folder.position, &old_folder.fullpath, &folder.position)
                 .await?;
-
-            // self.storage
-            //     .move_folder(&old_folder.fullpath, &folder.fullpath)
-            //     .await?;
-
-            // let old_folder_version_path = convert_folder_to_version(&old_folder.fullpath)?;
-            // let new_folder_version_path = convert_folder_to_version(&folder.fullpath)?;
-
-            // self.storage
-            //     .move_folder(&old_folder_version_path, &new_folder_version_path)
-            //     .await?;
         }
 
         let updated_folder = self.folder_db.update_folder(folder_id, folder).await?;
@@ -179,29 +165,14 @@ impl FolderService {
                 .await?;
         }
 
-        // let version_folder_fullpath = convert_folder_to_version(&deleted_folder.fullpath)?;
-
         self.folder_db
             .delete_folders_by_prefix_fullpath(&deleted_folder.fullpath)
             .await?;
-        // self.folder_db
-        //     .delete_folders_by_prefix_fullpath(&version_folder_fullpath)
-        //     .await?;
 
         self.file_db
             .delete_files_by_prefix_fullpath(&deleted_folder.fullpath)
             .await?;
-        // self.file_db
-        //     .delete_files_by_prefix_fullpath(&version_folder_fullpath)
-        //     .await?;
-
-        // self.storage.delete_folder(&deleted_folder.fullpath).await?;
-        // self.storage.delete_folder(&version_folder_fullpath).await?;
 
         Ok(())
     }
-
-    // pub async fn delete_folders_by_owner(&self, owner: &ObjectId) -> Result<()> {
-    //     self.folder_db.delete_folders_by_owner(owner).await
-    // }
 }

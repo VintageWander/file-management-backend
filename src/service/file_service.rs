@@ -94,10 +94,6 @@ impl FileService {
             return Err("Cannot create a file at a virtual position".into());
         }
         if !data.is_empty() {
-            // self.storage.create_file(&file.fullpath, data).await?;
-            // let version_file_path = convert_file_path_to_version_folder(&file.fullpath)?;
-            // self.storage.create_folder(&version_file_path).await?;
-
             let internal_full_filename = &format!("{}.{}", file.id, file.extension_to_str());
 
             self.storage
@@ -122,16 +118,6 @@ impl FileService {
                 "Changing extension is not supported, as it might render the file unusable".into(),
             );
         }
-        // if old_file.fullpath != file.fullpath {
-        //     self.storage
-        //         .move_file(&old_file.fullpath, &file.fullpath)
-        //         .await?;
-        //     let old_version_file_path = convert_file_path_to_version_folder(&old_file.fullpath)?;
-        //     let new_version_file_path = convert_file_path_to_version_folder(&file.fullpath)?;
-        //     self.storage
-        //         .move_folder(&old_version_file_path, &new_version_file_path)
-        //         .await?;
-        // }
 
         if old_file.fullpath != file.fullpath {
             let exists_file = self.file_db.exists_file_by_fullpath(&file.fullpath).await?;
@@ -157,7 +143,7 @@ impl FileService {
             let version = Utc::now().timestamp_millis();
 
             // Get the file path on the versioning side
-            // let file_version_path = convert_file_path_to_version_path(&file.fullpath, version)?;
+
             let file_version_path = format!("{}/{}.{}", file.id, version, file.extension_to_str());
 
             self.version_db
@@ -201,13 +187,12 @@ impl FileService {
         let file = self.get_file_by_id_owner(file_id, owner).await?;
 
         // Get its version path so we can replace the original
-        // let restore_version_path = convert_file_path_to_version_path(&file.fullpath, version)?;
+
         let restore_version_path = format!("{}/{}.{}", file.id, version, file.extension_to_str());
 
         // Now we need to create a new version path for that old file
         let new_version = Utc::now().timestamp_millis();
 
-        // let new_file_version_path = convert_file_path_to_version_path(&file.fullpath, new_version)?;
         let new_file_version_path =
             format!("{}/{}.{}", file.id, new_version, file.extension_to_str());
 
@@ -240,7 +225,6 @@ impl FileService {
 
     pub async fn delete_file_by_id(&self, file_id: &ObjectId) -> Result<()> {
         let deleted_file = self.file_db.delete_file_by_id(file_id).await?;
-        // let version_file_path = convert_file_path_to_version_folder(&deleted_file.fullpath)?;
 
         let internal_full_filename =
             &format!("{}.{}", deleted_file.id, deleted_file.extension_to_str());
@@ -250,8 +234,6 @@ impl FileService {
         self.storage
             .delete_folder(internal_file_version_path)
             .await?;
-
-        // self.storage.delete_folder(&version_file_path).await?;
 
         self.version_db.delete_versions_by_file_id(file_id).await?;
         Ok(())

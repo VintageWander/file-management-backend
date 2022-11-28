@@ -3,7 +3,6 @@ use salvo::{
     http::cookie::{time::Duration, Cookie},
     Depot, Request, Response,
 };
-// use serde_json::json;
 
 use crate::{
     helper::{
@@ -60,13 +59,5 @@ pub async fn login_handler(req: &mut Request, depot: &mut Depot, res: &mut Respo
         .update_refresh_token(&cookie_user_id, &refresh_jwt)
         .await?;
 
-    Ok(Web::ok(
-        "Login successfully",
-        // json!({
-        //     "user": cookie_user.into_response()?,
-        //     // "accessToken": access_jwt,
-        //     // "refreshToken": refresh_jwt,
-        // }
-        cookie_user.into_response()?,
-    ))
+    Ok(Web::ok("Login successfully", cookie_user.into_response()?))
 }

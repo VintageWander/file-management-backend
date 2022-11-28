@@ -141,15 +141,6 @@ impl File {
         }
     }
 
-    // pub fn id(&self) -> Result<ObjectId> {
-    //     self.id
-    //         .ok_or_else(|| "This file does not have an ID".into())
-    // }
-
-    // pub fn id_str(&self) -> Result<String> {
-    //     Ok(self.id()?.to_string())
-    // }
-
     pub fn into_response(self) -> Result<FileResponse> {
         FileResponse::from_file(self)
     }

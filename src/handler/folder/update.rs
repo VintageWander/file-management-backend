@@ -14,13 +14,8 @@ use crate::{
 };
 
 #[handler]
-pub async fn update_folder_handler(
-    req: &mut Request,
-    depot: &mut Depot,
-    // res: &mut Response,
-) -> WebResult {
+pub async fn update_folder_handler(req: &mut Request, depot: &mut Depot) -> WebResult {
     // Checks if the user has logged in or not
-    // let cookie_user_id = get_cookie_user_id(depot)?;
 
     // Extract the data from request
     let folder_req = extract_from_body::<UpdateFolderRequest>(req).await?;
