@@ -3,14 +3,14 @@ use salvo::{handler, Depot, FlowCtrl, Request, Response};
 use crate::{
     error::Error,
     helper::{
-        depot::{ get_user_service},
+        depot::get_user_service,
         jwt::{decode_jwt, JwtType},
     },
     Result,
 };
 
 #[handler]
-pub async fn check_login(
+pub async fn check_login_middleware(
     req: &mut Request,
     depot: &mut Depot,
     res: &mut Response,

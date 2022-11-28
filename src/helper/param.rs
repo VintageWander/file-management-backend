@@ -24,7 +24,7 @@ pub fn get_param_folder_id(req: &mut Request) -> Result<ObjectId> {
     Ok(param_folder_id)
 }
 
-pub fn get_version_number(req: &mut Request) -> Result<i64> {
+pub fn get_param_version_number(req: &mut Request) -> Result<i64> {
     let version_number = extract_from_param(req, "version_number")?;
     Ok(version_number)
 }

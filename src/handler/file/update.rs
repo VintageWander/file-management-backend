@@ -4,10 +4,9 @@ use tokio::{fs::File, io::AsyncReadExt};
 use crate::{
     helper::{
         cookie::get_cookie_user_id,
-        depot::{get_file_service, get_file_version_service, get_user_service},
+        depot::{get_file_service, get_file_version_service, get_param_file, get_user_service},
         file::get_file_from_req_option,
         form::extract_from_form,
-        param::get_param_file_id,
     },
     request::file::update::UpdateFileRequest,
     response::FinalFileResponse,
@@ -30,13 +29,11 @@ pub async fn update_file_handler(
     // Get the file db
     let file_service = get_file_service(depot)?;
 
-    // Get the file id from param
-    let param_file_id = get_param_file_id(req)?;
+    // // Get the file id from param
+    // let param_file_id = get_param_file_id(req)?;
 
     // Get the old file
-    let old_file = file_service
-        .get_file_by_id_owner(&param_file_id, cookie_user_id)
-        .await?;
+    let old_file = get_param_file(depot)?;
 
     // Get the cookie_user
     let cookie_user = get_user_service(depot)?
@@ -65,11 +62,11 @@ pub async fn update_file_handler(
             let full_filename = file.name();
 
             // Construct the file model from request
-            let file_model = file_req.into_file(full_filename, old_file, &cookie_user)?;
+            let file_model = file_req.into_file(full_filename, old_file.clone(), &cookie_user)?;
 
             // Send the file model to the database
             let updated_file = file_service
-                .update_file_by_id(&param_file_id, file_model, file_stream)
+                .update_file_by_id(&old_file.id, file_model, file_stream)
                 .await?;
             let updated_file_id = updated_file.id;
 
@@ -88,11 +85,11 @@ pub async fn update_file_handler(
         // If there is no file
         None => {
             // Construct a file model
-            let file_model = file_req.into_file(None, old_file, &cookie_user)?;
+            let file_model = file_req.into_file(None, old_file.clone(), &cookie_user)?;
             // Send the information to the database
             // Without the file ( vec![] )
             let updated_file = file_service
-                .update_file_by_id(&param_file_id, file_model, vec![])
+                .update_file_by_id(&old_file.id, file_model, vec![])
                 .await?;
             let updated_file_id = updated_file.id;
 

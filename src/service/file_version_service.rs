@@ -36,6 +36,13 @@ impl FileVersionService {
     }
 
     pub async fn delete_version_by_file_version(&self, file: &File, version: i64) -> Result<()> {
+        if !self
+            .file_version_db
+            .exists_version_by_file_id_version(&file.id, version)
+            .await?
+        {
+            return Err("Cannot find the version with the provided information".into());
+        }
         let file_id = file.id;
         let internal_file_version_path =
             &format!("{}/{}.{}", file.id, version, file.extension_to_str());

@@ -11,7 +11,7 @@ use crate::{
             update::update_user_handler,
         },
     },
-    middleware::auth::check_login,
+    middleware::auth::check_login_middleware,
 };
 
 pub fn user_routes() -> Router {
@@ -51,20 +51,20 @@ pub fn create_user_route() -> Router {
 pub fn update_user_route() -> Router {
     Router::with_path("update")
         .path("<param_user_id>")
-        .hoop(check_login)
+        .hoop(check_login_middleware)
         .put(update_user_handler)
 }
 
 pub fn delete_user_route() -> Router {
     Router::with_path("delete")
         .path("<param_user_id>")
-        .hoop(check_login)
+        .hoop(check_login_middleware)
         .delete(delete_user_handler)
 }
 
 pub fn profile_route() -> Router {
     Router::with_path("profile")
-        .hoop(check_login)
+        .hoop(check_login_middleware)
         .get(profile_handler)
 }
 
@@ -74,12 +74,12 @@ pub fn login_route() -> Router {
 
 pub fn refresh_route() -> Router {
     Router::with_path("refresh")
-        .hoop(check_login)
+        .hoop(check_login_middleware)
         .post(refresh_handler)
 }
 
 pub fn logout_route() -> Router {
     Router::with_path("logout")
-        .hoop(check_login)
+        .hoop(check_login_middleware)
         .delete(logout_handler)
 }

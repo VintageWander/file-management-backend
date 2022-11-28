@@ -7,7 +7,7 @@ use crate::{
         get::{get_folder_by_id_handler, get_public_folders_handler},
         update::update_folder_handler,
     },
-    middleware::auth::check_login,
+    middleware::auth::check_login_middleware,
 };
 
 pub fn folder_routes() -> Router {
@@ -25,26 +25,26 @@ pub fn get_public_folders_route() -> Router {
 
 pub fn get_folder_route() -> Router {
     Router::with_path("<param_folder_id>")
-        .hoop(check_login)
+        .hoop(check_login_middleware)
         .get(get_folder_by_id_handler)
 }
 
 pub fn create_folder_route() -> Router {
     Router::with_path("create")
-        .hoop(check_login)
+        .hoop(check_login_middleware)
         .post(create_folder_handler)
 }
 
 pub fn update_folder_route() -> Router {
     Router::with_path("update")
         .path("<param_folder_id>")
-        .hoop(check_login)
+        .hoop(check_login_middleware)
         .put(update_folder_handler)
 }
 
 pub fn delete_folder_route() -> Router {
     Router::with_path("delete")
         .path("<param_folder_id>")
-        .hoop(check_login)
+        .hoop(check_login_middleware)
         .delete(delete_folder_handler)
 }

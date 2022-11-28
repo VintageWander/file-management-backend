@@ -1,14 +1,20 @@
 use salvo::Router;
 
 use crate::{
-    handler::file::{
-        create::create_file_handler,
-        delete::delete_file_handler,
-        get::{get_file_by_id_handler, get_public_files_handler},
-        restore::restore_file_handler,
-        update::update_file_handler,
+    handler::{
+        file::{
+            create::create_file_handler,
+            delete::delete_file_handler,
+            get::{get_file_by_id_handler, get_public_files_handler},
+            restore::restore_file_handler,
+            update::update_file_handler,
+        },
+        version::{
+            delete::delete_file_version_handler,
+            get::{get_version_handler, get_versions_handler},
+        },
     },
-    middleware::auth::check_login,
+    middleware::{auth::check_login_middleware, file::get_file_by_id_middleware},
 };
 
 pub fn file_routes() -> Router {
@@ -17,7 +23,10 @@ pub fn file_routes() -> Router {
         .push(create_file_route()) // file/create/
         .push(update_file_route()) // file/update/<param_file_id>
         .push(delete_file_route()) // file/delete/<param_file_id>
-        .push(restore_file_route()) // file/restore/<param_file_id>/<version_number>
+        .push(restore_file_route()) // file/<param_file_id>/versions/restore/<version_number>
+        .push(delete_version_route()) // file/<param_file_id>/versions/delete/<version_number>
+        .push(get_file_version_route()) // file/<param_file_id>/versions/<version_number>
+        .push(get_file_versions_route()) // file/<param_file_id>/versions/
         .push(get_file_route()) // file/<param_file_id>
 }
 
@@ -27,34 +36,65 @@ pub fn get_public_files_route() -> Router {
 
 pub fn get_file_route() -> Router {
     Router::with_path("<param_file_id>")
-        .hoop(check_login)
+        .hoop(check_login_middleware)
         .get(get_file_by_id_handler)
 }
 
 pub fn create_file_route() -> Router {
     Router::with_path("create")
-        .hoop(check_login)
+        .hoop(check_login_middleware)
         .post(create_file_handler)
 }
 
 pub fn update_file_route() -> Router {
     Router::with_path("update")
         .path("<param_file_id>")
-        .hoop(check_login)
+        .hoop(check_login_middleware)
+        .hoop(get_file_by_id_middleware)
         .put(update_file_handler)
 }
 
 pub fn delete_file_route() -> Router {
     Router::with_path("delete")
         .path("<param_file_id>")
-        .hoop(check_login)
+        .hoop(check_login_middleware)
+        .hoop(get_file_by_id_middleware)
         .delete(delete_file_handler)
 }
 
+pub fn get_file_versions_route() -> Router {
+    Router::with_path("<param_file_id>")
+        .path("versions")
+        .hoop(check_login_middleware)
+        .hoop(get_file_by_id_middleware)
+        .get(get_versions_handler)
+}
+
+pub fn get_file_version_route() -> Router {
+    Router::with_path("<param_file_id>")
+        .path("versions")
+        .path("<version_number>")
+        .hoop(check_login_middleware)
+        .hoop(get_file_by_id_middleware)
+        .get(get_version_handler)
+}
+
 pub fn restore_file_route() -> Router {
-    Router::with_path("restore")
-        // .path("<param_file_id>")
-        // .path("<version_number>")
-        .hoop(check_login)
+    Router::with_path("<param_file_id>")
+        .path("versions")
+        .path("restore")
+        .path("<version_number>")
+        .hoop(check_login_middleware)
+        .hoop(get_file_by_id_middleware)
         .put(restore_file_handler)
+}
+
+pub fn delete_version_route() -> Router {
+    Router::with_path("<param_file_id>")
+        .path("versions")
+        .path("delete")
+        .path("<version_number>")
+        .hoop(check_login_middleware)
+        .hoop(get_file_by_id_middleware)
+        .delete(delete_file_version_handler)
 }
