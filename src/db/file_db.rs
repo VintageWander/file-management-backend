@@ -79,6 +79,17 @@ impl FileDB {
         .await
     }
 
+    pub async fn get_files_by_prefix_fullpath(&self, prefix: &str) -> Result<Vec<File>> {
+        let position_regex = Regex {
+            pattern: format!("^{prefix}"),
+            options: String::new(),
+        };
+        self.get_files_by(doc! {
+            "fullpath": {"$regex": position_regex}
+        })
+        .await
+    }
+
     pub async fn get_public_files_by_prefix_position(&self, prefix: &str) -> Result<Vec<File>> {
         let position_regex = Regex {
             pattern: format!("^{prefix}"),

@@ -9,6 +9,8 @@ use crate::response::folder::FolderResponse;
 use crate::validation::file::{check_dir, check_folder_name};
 use crate::Result;
 
+use super::user::User;
+
 #[derive(Debug, Clone, Deserialize, Serialize, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct Folder {
@@ -58,7 +60,7 @@ impl From<Folder> for Document {
 impl Folder {
     pub fn new(
         id: ObjectId,
-        owner: &ObjectId,
+        owner: &User,
         folder_name: &str,
         visibility: Visibility,
         position: &str,
@@ -67,11 +69,11 @@ impl Folder {
         check_folder_name(folder_name).map_err(into_string)?;
         check_dir(position).map_err(into_string)?;
 
-        let position = format!("{owner}/{position}");
+        let position = format!("{}/{position}", owner.username);
         let fullpath = format!("{position}{folder_name}/");
         let folder = Folder {
             id,
-            owner: *owner,
+            owner: owner.id,
             visibility,
             folder_name: folder_name.to_string(),
             position,
@@ -87,15 +89,15 @@ impl Folder {
         FolderResponse::from_folder(self)
     }
 
-    pub fn new_root(owner: &ObjectId) -> Result<Self> {
+    pub fn new_root(owner: &User) -> Result<Self> {
         let folder_id = ObjectId::new();
         let root = Self {
             id: folder_id,
-            owner: *owner,
-            folder_name: owner.to_string(),
+            owner: owner.id,
+            folder_name: owner.username.clone(),
             visibility: Visibility::Private,
-            position: format!("{owner}/"),
-            fullpath: format!("{owner}/"),
+            position: format!("{}/", owner.username),
+            fullpath: format!("{}/", owner.username),
             created_at: Utc::now().timestamp_millis(),
             updated_at: Utc::now().timestamp_millis(),
         };

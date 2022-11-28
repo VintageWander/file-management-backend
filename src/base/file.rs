@@ -6,6 +6,8 @@ use validator::Validate;
 
 use crate::validation::file::{check_dir, check_filename, check_full_filename, check_fullpath};
 
+use super::user::User;
+
 #[derive(Debug, Clone, Deserialize, Serialize, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct File {
@@ -83,7 +85,7 @@ impl File {
     // It's best to just construct an entire struct and validate it all in one go
     pub fn new(
         id: ObjectId,
-        owner: &ObjectId,
+        owner: &User,
         full_filename: &str,
         visibility: Visibility,
         position: &str,
@@ -104,11 +106,11 @@ impl File {
             _ => return Err("Invalid extension".into()),
         };
 
-        let position = format!("{owner}/{position}");
+        let position = &format!("{}/{}", owner.username, position);
 
         let file = File {
             id,
-            owner: *owner,
+            owner: owner.id,
             filename: filename.to_string(),
             extension,
             visibility,

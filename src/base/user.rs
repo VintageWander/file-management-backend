@@ -4,11 +4,8 @@ use mongodb::bson::{doc, oid::ObjectId, Document};
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-use crate::response::user::UserWithFileResponse;
 use crate::validation::user::{check_password, check_username};
 use crate::{response::user::UserResponse, Result};
-
-use super::file::File;
 
 #[derive(Debug, Deserialize, Serialize, Validate, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -70,25 +67,4 @@ impl User {
     pub fn into_response(self) -> Result<UserResponse> {
         UserResponse::from_user(self)
     }
-
-    pub fn into_response_with_files(self, files: Vec<File>) -> Result<UserWithFileResponse> {
-        let res = UserWithFileResponse {
-            id: self.id.to_string(),
-            username: self.username,
-            email: self.email,
-            files,
-            created_at: self.created_at,
-            updated_at: self.updated_at,
-        };
-        Ok(res)
-    }
-
-    // pub fn id_str(&self) -> Result<String> {
-    //     Ok(self.id()?.to_string())
-    // }
-
-    // pub fn id(&self) -> Result<ObjectId> {
-    //     self.id
-    //         .ok_or_else(|| "This user does not have an ID".into())
-    // }
 }

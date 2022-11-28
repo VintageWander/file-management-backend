@@ -72,15 +72,15 @@ impl UserService {
         }
 
         let new_user = self.user_db.create_user(user).await?;
-        let root_folder = Folder::new_root(&new_user.id)?;
+        let root_folder = Folder::new_root(&new_user)?;
 
-        self.storage
-            .create_folder(&format!("{}/", root_folder.owner))
-            .await?;
+        // self.storage
+        //     .create_folder(&format!("{}/", root_folder.owner))
+        //     .await?;
 
-        self.storage
-            .create_folder(&format!("{}-version-db/", &root_folder.owner))
-            .await?;
+        // self.storage
+        //     .create_folder(&format!("{}-version-db/", &root_folder.owner))
+        //     .await?;
 
         self.folder_db.create_folder(root_folder).await?;
 
@@ -117,17 +117,29 @@ impl UserService {
     pub async fn delete_user_by_id(&self, user_id: &ObjectId) -> Result<()> {
         let deleted_user = self.user_db.delete_user(user_id).await?;
 
+        let files = self.file_db.get_files_by_owner(&deleted_user.id).await?;
+
+        for file in files {
+            let internal_full_filename = &format!("{}.{}", file.id, file.extension_to_str());
+            let internal_file_version_path = &format!("{}/", file.id);
+
+            self.storage.delete_file(internal_full_filename).await?;
+            self.storage
+                .delete_folder(internal_file_version_path)
+                .await?;
+        }
+
+        self.file_db.delete_files_by_owner(&deleted_user.id).await?;
         self.folder_db
             .delete_folders_by_owner(&deleted_user.id)
             .await?;
-        self.file_db.delete_files_by_owner(&deleted_user.id).await?;
 
-        self.storage
-            .delete_folder(&format!("{}/", deleted_user.id))
-            .await?;
-        self.storage
-            .delete_folder(&format!("{}-version-db/", deleted_user.id))
-            .await?;
+        // self.storage
+        //     .delete_folder(&format!("{}/", deleted_user.id))
+        //     .await?;
+        // self.storage
+        //     .delete_folder(&format!("{}-version-db/", deleted_user.id))
+        //     .await?;
 
         Ok(())
     }

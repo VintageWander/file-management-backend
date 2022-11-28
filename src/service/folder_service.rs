@@ -4,7 +4,7 @@ use crate::{
     aws::S3,
     base::folder::Folder,
     db::{file_db::FileDB, folder_db::FolderDB},
-    helper::{into_string, versioning::convert_folder_to_version},
+    helper::into_string,
     validation::file::check_dir,
     Result,
 };
@@ -88,10 +88,10 @@ impl FolderService {
         }
 
         let folder = self.folder_db.create_folder(folder).await?;
-        let version_folder_fullpath = convert_folder_to_version(&folder.fullpath)?;
+        // let version_folder_fullpath = convert_folder_to_version(&folder.fullpath)?;
 
-        self.storage.create_folder(&folder.fullpath).await?;
-        self.storage.create_folder(&version_folder_fullpath).await?;
+        // self.storage.create_folder(&folder.fullpath).await?;
+        // self.storage.create_folder(&version_folder_fullpath).await?;
         Ok(folder)
     }
 
@@ -111,6 +111,9 @@ impl FolderService {
             if !exists_folder_at_postion {
                 return Err("Cannot move folder to a virtual position".into());
             }
+            if old_folder.fullpath == folder.position {
+                return Err("Cannot move to self".into());
+            }
             self.folder_db
                 .move_inner_folders(&old_folder.position, &old_folder.fullpath, &folder.position)
                 .await?;
@@ -118,16 +121,16 @@ impl FolderService {
                 .move_inner_files(&old_folder.position, &old_folder.fullpath, &folder.position)
                 .await?;
 
-            self.storage
-                .move_folder(&old_folder.fullpath, &folder.fullpath)
-                .await?;
+            // self.storage
+            //     .move_folder(&old_folder.fullpath, &folder.fullpath)
+            //     .await?;
 
-            let old_folder_version_path = convert_folder_to_version(&old_folder.fullpath)?;
-            let new_folder_version_path = convert_folder_to_version(&folder.fullpath)?;
+            // let old_folder_version_path = convert_folder_to_version(&old_folder.fullpath)?;
+            // let new_folder_version_path = convert_folder_to_version(&folder.fullpath)?;
 
-            self.storage
-                .move_folder(&old_folder_version_path, &new_folder_version_path)
-                .await?;
+            // self.storage
+            //     .move_folder(&old_folder_version_path, &new_folder_version_path)
+            //     .await?;
         }
 
         let updated_folder = self.folder_db.update_folder(folder_id, folder).await?;
@@ -146,29 +149,45 @@ impl FolderService {
             .delete_folder_by_id_owner(folder_id, owner)
             .await?;
 
-        let version_folder_fullpath = convert_folder_to_version(&deleted_folder.fullpath)?;
+        // Delete all of the files in S3 that are related to the folder
+        let files = self
+            .file_db
+            .get_files_by_prefix_fullpath(&deleted_folder.fullpath)
+            .await?;
+
+        for file in files {
+            let internal_full_filename = &format!("{}.{}", file.id, file.extension_to_str());
+            let internal_file_version_path = &format!("{}/", file.id);
+
+            self.storage.delete_file(internal_full_filename).await?;
+            self.storage
+                .delete_folder(internal_file_version_path)
+                .await?;
+        }
+
+        // let version_folder_fullpath = convert_folder_to_version(&deleted_folder.fullpath)?;
 
         self.folder_db
             .delete_folders_by_prefix_fullpath(&deleted_folder.fullpath)
             .await?;
-        self.folder_db
-            .delete_folders_by_prefix_fullpath(&version_folder_fullpath)
-            .await?;
+        // self.folder_db
+        //     .delete_folders_by_prefix_fullpath(&version_folder_fullpath)
+        //     .await?;
 
         self.file_db
             .delete_files_by_prefix_fullpath(&deleted_folder.fullpath)
             .await?;
-        self.file_db
-            .delete_files_by_prefix_fullpath(&version_folder_fullpath)
-            .await?;
+        // self.file_db
+        //     .delete_files_by_prefix_fullpath(&version_folder_fullpath)
+        //     .await?;
 
-        self.storage.delete_folder(&deleted_folder.fullpath).await?;
-        self.storage.delete_folder(&version_folder_fullpath).await?;
+        // self.storage.delete_folder(&deleted_folder.fullpath).await?;
+        // self.storage.delete_folder(&version_folder_fullpath).await?;
 
         Ok(())
     }
 
-    pub async fn delete_folder_by_owner(&self, owner: &ObjectId) -> Result<()> {
-        self.folder_db.delete_folders_by_owner(owner).await
-    }
+    // pub async fn delete_folders_by_owner(&self, owner: &ObjectId) -> Result<()> {
+    //     self.folder_db.delete_folders_by_owner(owner).await
+    // }
 }
