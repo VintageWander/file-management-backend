@@ -2,7 +2,10 @@ use serde::{Deserialize, Serialize};
 use validator::Validate;
 
 use crate::{
-    base::file::{File, Visibility},
+    base::{
+        file::{File, Visibility},
+        user::User,
+    },
     validation::file::{check_dir, check_visibility},
     Result,
 };
@@ -16,7 +19,12 @@ pub struct UpdateFileRequest {
 }
 
 impl UpdateFileRequest {
-    pub fn into_file(self, full_filename: Option<&str>, old_file: File) -> Result<File> {
+    pub fn into_file(
+        self,
+        full_filename: Option<&str>,
+        old_file: File,
+        owner: &User,
+    ) -> Result<File> {
         self.validate()?;
 
         let visibility = match self.visibility.as_str() {
@@ -27,7 +35,7 @@ impl UpdateFileRequest {
 
         File::new(
             old_file.id,
-            &old_file.owner,
+            owner,
             full_filename.unwrap_or(&old_file.full_filename),
             visibility,
             &self.position.unwrap_or(old_file.position),
