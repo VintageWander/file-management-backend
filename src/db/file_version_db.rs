@@ -69,11 +69,7 @@ impl FileVersionDB {
             .await
     }
 
-    pub async fn create_version_with_file_id(
-        &self,
-        file_id: &ObjectId,
-        file_ver: FileVersion,
-    ) -> Result<FileVersion> {
+    pub async fn create_version_with_file_id(&self, file_ver: FileVersion) -> Result<FileVersion> {
         let file_ver_id = self
             .collection
             .insert_one(file_ver, None)

@@ -53,6 +53,9 @@ impl FileDB {
         self.get_file_by(doc! {"_id": id}).await
     }
 
+    // This function is important because it is used for getting the file at id, but it has to be public
+    // Useful for returning a public file for visitors
+    // It will purposely fail if the file at id is private
     pub async fn get_public_file_by_id(&self, id: &ObjectId) -> Result<File> {
         self.get_file_by(doc! {"_id": id, "visibility": "public"})
             .await
