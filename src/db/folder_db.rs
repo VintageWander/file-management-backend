@@ -52,6 +52,10 @@ impl FolderDB {
         self.get_folder_by(doc! {"_id": id}).await
     }
 
+    pub async fn get_folder_by_id_owner(&self, id: &ObjectId, owner: &ObjectId) -> Result<Folder> {
+        self.get_folder_by(doc! {"_id": id, "owner": owner}).await
+    }
+
     pub async fn get_public_folder_by_id(&self, id: &ObjectId) -> Result<Folder> {
         self.get_folder_by(doc! {"_id": id, "visibility": "public"})
             .await
