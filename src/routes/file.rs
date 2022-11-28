@@ -53,8 +53,8 @@ pub fn delete_file_route() -> Router {
 
 pub fn restore_file_route() -> Router {
     Router::with_path("restore")
-        .path("<param_file_id>")
-        .path("<version_number>")
+        // .path("<param_file_id>")
+        // .path("<version_number>")
         .hoop(check_login)
         .put(restore_file_handler)
 }
