@@ -1,6 +1,6 @@
 use salvo::{
     handler,
-    http::cookie::{time::Duration, Cookie},
+    http::cookie::{time::Duration, Cookie, SameSite},
     Depot, Request, Response,
 };
 
@@ -12,7 +12,7 @@ use crate::{
 };
 
 #[handler]
-pub async fn logout_handler(req: &Request, depot: &Depot, res: &mut Response) -> WebResult {
+pub async fn logout_handler(req: &mut Request, depot: &Depot, res: &mut Response) -> WebResult {
     // Get the cookie user id send from the check login middleware
     let cookie_user_id = get_cookie_user_id(depot)?;
 
@@ -42,6 +42,7 @@ pub async fn logout_handler(req: &Request, depot: &Depot, res: &mut Response) ->
             .path("/")
             .max_age(Duration::minutes(30))
             .http_only(true)
+            .same_site(SameSite::None)
             .finish(),
     );
     res.cookies_mut().remove(
@@ -49,6 +50,7 @@ pub async fn logout_handler(req: &Request, depot: &Depot, res: &mut Response) ->
             .path("/")
             .max_age(Duration::hours(2))
             .http_only(true)
+            .same_site(SameSite::None)
             .finish(),
     );
 

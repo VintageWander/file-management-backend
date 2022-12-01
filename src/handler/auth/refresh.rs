@@ -1,6 +1,6 @@
 use salvo::{
     handler,
-    http::cookie::{time::Duration, Cookie},
+    http::cookie::{time::Duration, Cookie, SameSite},
     Depot, Request, Response,
 };
 
@@ -15,7 +15,7 @@ use crate::{
 };
 
 #[handler]
-pub async fn refresh_handler(req: &Request, depot: &Depot, res: &mut Response) -> WebResult {
+pub async fn refresh_handler(req: &mut Request, depot: &Depot, res: &mut Response) -> WebResult {
     // Get the refresh token from the cookie, there are two cases might happen
     let refresh_token = req
         .cookie("refreshToken")
@@ -41,6 +41,7 @@ pub async fn refresh_handler(req: &Request, depot: &Depot, res: &mut Response) -
             .path("/")
             .max_age(Duration::minutes(30))
             .http_only(true)
+            .same_site(SameSite::None)
             .finish(),
     );
 
@@ -50,6 +51,7 @@ pub async fn refresh_handler(req: &Request, depot: &Depot, res: &mut Response) -
             .path("/")
             .max_age(Duration::minutes(30))
             .http_only(true)
+            .same_site(SameSite::None)
             .finish(),
     );
 

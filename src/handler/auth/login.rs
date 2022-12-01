@@ -1,6 +1,6 @@
 use salvo::{
     handler,
-    http::cookie::{time::Duration, Cookie},
+    http::cookie::{time::Duration, Cookie, SameSite},
     Depot, Request, Response,
 };
 
@@ -43,6 +43,7 @@ pub async fn login_handler(req: &mut Request, depot: &mut Depot, res: &mut Respo
             .path("/")
             .max_age(Duration::minutes(30))
             .http_only(true)
+            .same_site(SameSite::None)
             .finish(),
     );
 
@@ -51,6 +52,7 @@ pub async fn login_handler(req: &mut Request, depot: &mut Depot, res: &mut Respo
             .path("/")
             .max_age(Duration::hours(2))
             .http_only(true)
+            .same_site(SameSite::None)
             .finish(),
     );
 
