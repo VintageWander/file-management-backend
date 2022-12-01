@@ -1,4 +1,4 @@
-use salvo::Router;
+use salvo::{prelude::empty_handler, Router};
 
 use crate::{
     handler::folder::{
@@ -33,6 +33,7 @@ pub fn get_folder_route() -> Router {
 pub fn create_folder_route() -> Router {
     Router::with_path("create")
         .hoop(check_login_middleware)
+        .options(empty_handler)
         .post(create_folder_handler)
 }
 
@@ -40,6 +41,7 @@ pub fn update_folder_route() -> Router {
     Router::with_path("update/<param_folder_id>")
         .hoop(check_login_middleware)
         .hoop(get_folder_by_id_middleware)
+        .options(empty_handler)
         .put(update_folder_handler)
 }
 
@@ -47,5 +49,6 @@ pub fn delete_folder_route() -> Router {
     Router::with_path("delete/<param_folder_id>")
         .hoop(check_login_middleware)
         .hoop(get_folder_by_id_middleware)
+        .options(empty_handler)
         .delete(delete_folder_handler)
 }
