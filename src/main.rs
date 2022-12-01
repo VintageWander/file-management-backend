@@ -46,10 +46,9 @@ async fn main() -> Result<()> {
     let file_version_service = FileVersionService::init(&file_version_db, &s3);
 
     let cors_builder = Cors::builder()
-        .allow_credentials(true)
         .allow_any_origin()
-        //.allow_origin("http://192.168.0.193/8100")
         .allow_methods(vec!["GET", "POST", "PUT", "DELETE"])
+        .allow_credentials(true)
         .build();
 
     let router = Router::with_hoop(cors_builder)
