@@ -29,6 +29,9 @@ pub struct UpdateUserRequest {
 impl UpdateUserRequest {
     pub fn into_user(self, old_user: User) -> Result<User> {
         self.validate()?;
+        if self.new_password != self.confirm_password {
+            return Err("The new password and the confirm new password does not match".into());
+        }
         if *old_user.password != self.password {
             return Err("The provided password does not match with the current password".into());
         }
