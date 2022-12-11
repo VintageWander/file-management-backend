@@ -22,7 +22,15 @@ impl FolderDB {
     }
 
     pub async fn get_folders_by(&self, doc: Document) -> Result<Vec<Folder>> {
-        let folders = self.collection.find(doc, None).await?.try_collect().await?;
+        let folders = self
+            .collection
+            .find(doc, None)
+            .await?
+            .try_collect::<Vec<_>>()
+            .await?
+            .into_iter()
+            .filter(|f| f.position != f.fullpath)
+            .collect();
         Ok(folders)
     }
 
