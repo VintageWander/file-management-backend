@@ -52,6 +52,7 @@ impl FolderResponse {
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct FinalFolderResponse {
     #[serde(flatten)]
     pub folder: FolderResponse,

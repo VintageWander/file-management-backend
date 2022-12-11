@@ -10,6 +10,7 @@ use crate::Result;
 use super::user::UserResponse;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Validate)]
+#[serde(rename_all = "camelCase")]
 pub struct FileResponse {
     pub id: String,
     pub owner: String,
@@ -53,6 +54,7 @@ impl FileResponse {
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct FinalFileResponse {
     #[serde(flatten)]
     pub file: FileResponse,

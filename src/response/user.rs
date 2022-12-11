@@ -11,6 +11,7 @@ use super::file::FileResponse;
 use super::folder::FolderResponse;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Validate)]
+#[serde(rename_all = "camelCase")]
 pub struct UserResponse {
     pub id: String,
     #[validate(custom = "check_username")]
@@ -50,6 +51,7 @@ impl UserResponse {
 }
 
 #[derive(Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct FinalUserResponse {
     #[serde(flatten)]
     pub user: UserResponse,
