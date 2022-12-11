@@ -68,7 +68,6 @@ impl FinalUserResponse {
 
         let folders = folders
             .into_iter()
-            .filter(|f| f.folder_name != user.username)
             .map(|f| f.into_response())
             .collect::<Result<_>>()?;
 
