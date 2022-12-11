@@ -101,6 +101,45 @@ impl UserService {
 
         let updated_user = self.user_db.update_user(&user.id.clone(), user).await?;
 
+        let user_files = self.file_db.get_files_by_owner(&updated_user.id).await?;
+        for file in user_files {
+            let (_, rest) = file
+                .position
+                .split_once('/')
+                .ok_or("Cannot get the rest file path to update")?;
+
+            let new_position = &format!("{}/{}", updated_user.username, rest);
+            self.file_db
+                .move_inner_files(&file.position, &file.fullpath, new_position)
+                .await?;
+        }
+
+        let user_folders = self
+            .folder_db
+            .get_folders_by_owner(&updated_user.id)
+            .await?;
+        for folder in user_folders {
+            let (_, rest) = folder
+                .position
+                .split_once('/')
+                .ok_or("Cannot get the rest folder path to update")?;
+
+            let new_position = &format!("{}/{}", updated_user.username, rest);
+
+            self.folder_db
+                .update_folder(
+                    &folder.id,
+                    Folder {
+                        folder_name: updated_user.username.clone(),
+                        ..folder.clone()
+                    },
+                )
+                .await?;
+            self.folder_db
+                .move_inner_folders(&folder.position, &folder.fullpath, new_position)
+                .await?;
+        }
+
         Ok(updated_user)
     }
 
