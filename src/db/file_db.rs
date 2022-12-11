@@ -22,7 +22,7 @@ impl FileDB {
         }
     }
 
-    async fn get_files_by(&self, doc: Document) -> Result<Vec<File>> {
+    pub async fn get_files_by(&self, doc: Document) -> Result<Vec<File>> {
         let files = self.collection.find(doc, None).await?.try_collect().await?;
         Ok(files)
     }
@@ -74,6 +74,17 @@ impl FileDB {
     pub async fn get_files_by_prefix_position(&self, prefix: &str) -> Result<Vec<File>> {
         let position_regex = Regex {
             pattern: format!("^{prefix}"),
+            options: String::new(),
+        };
+        self.get_files_by(doc! {
+            "position": {"$regex": position_regex}
+        })
+        .await
+    }
+
+    pub async fn get_files_by_prefix_exact_position(&self, prefix: &str) -> Result<Vec<File>> {
+        let position_regex = Regex {
+            pattern: format!("^{prefix}$"),
             options: String::new(),
         };
         self.get_files_by(doc! {
@@ -193,15 +204,15 @@ impl FileDB {
                 },
                 vec![
                     doc! {
-                    "$set": {
-                        "position": {
-                            "$replaceOne": {
-                                "input": "$position",
-                                "find": old_position,
-                                "replacement": new_position
+                        "$set": {
+                            "position": {
+                                "$replaceOne": {
+                                    "input": "$position",
+                                    "find": old_position,
+                                    "replacement": new_position
+                                }
                             }
                         }
-                    }
                     },
                     doc! {
                         "$set": {
