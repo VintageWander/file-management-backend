@@ -5,7 +5,7 @@ use crate::{
         file::{
             create::create_file_handler,
             delete::delete_file_handler,
-            get::{get_file_by_id_handler, get_public_files_handler},
+            get::{get_file_by_id_handler, get_files_handler},
             restore::restore_file_handler,
             update::update_file_handler,
         },
@@ -19,7 +19,7 @@ use crate::{
 
 pub fn file_routes() -> Router {
     Router::with_path("file")
-        .push(get_public_files_route()) // file/
+        .push(get_files_route()) // file/
         .push(create_file_route()) // file/create/
         .push(update_file_route()) // file/update/<param_file_id>
         .push(delete_file_route()) // file/delete/<param_file_id>
@@ -30,8 +30,10 @@ pub fn file_routes() -> Router {
         .push(get_file_route()) // file/<param_file_id>
 }
 
-pub fn get_public_files_route() -> Router {
-    Router::new().get(get_public_files_handler)
+pub fn get_files_route() -> Router {
+    Router::new()
+        .hoop(check_login_middleware)
+        .get(get_files_handler)
 }
 
 pub fn get_file_route() -> Router {
