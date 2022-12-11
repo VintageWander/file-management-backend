@@ -1,4 +1,6 @@
-use mongodb::bson::oid::ObjectId;
+use std::{collections::HashMap, str::FromStr};
+
+use mongodb::bson::{oid::ObjectId, Bson, Document};
 
 use crate::{
     aws::S3,
@@ -23,6 +25,22 @@ impl FolderService {
             folder_db: folder_db.clone(),
             storage: storage.clone(),
         }
+    }
+
+    pub async fn get_folders_by_map(&self, map: &HashMap<String, String>) -> Result<Vec<Folder>> {
+        let mut document = HashMap::new();
+        for i in map {
+            if *i.0 == "owner" {
+                document.insert(
+                    "owner".to_string(),
+                    Bson::ObjectId(ObjectId::from_str(i.1)?),
+                );
+            } else {
+                document.insert(i.0.to_string(), Bson::String(i.1.to_string()));
+            }
+        }
+        let doc = Document::from_iter(document);
+        self.folder_db.get_folders_by(doc).await
     }
 
     pub async fn get_folders_by_owner(&self, owner: &ObjectId) -> Result<Vec<Folder>> {
@@ -63,6 +81,13 @@ impl FolderService {
     pub async fn get_folders_by_prefix_position(&self, prefix: &str) -> Result<Vec<Folder>> {
         check_dir(prefix).map_err(into_string)?;
         self.folder_db.get_folders_by_prefix_position(prefix).await
+    }
+
+    pub async fn get_folders_by_prefix_exact_position(&self, prefix: &str) -> Result<Vec<Folder>> {
+        check_dir(prefix).map_err(into_string)?;
+        self.folder_db
+            .get_folders_by_prefix_exact_position(prefix)
+            .await
     }
 
     pub async fn get_public_folders_by_prefix_position(&self, prefix: &str) -> Result<Vec<Folder>> {

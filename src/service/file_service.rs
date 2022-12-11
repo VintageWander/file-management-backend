@@ -1,5 +1,7 @@
+use std::{collections::HashMap, str::FromStr};
+
 use chrono::Utc;
-use mongodb::bson::oid::ObjectId;
+use mongodb::bson::{oid::ObjectId, Bson, Document};
 
 use crate::{
     aws::S3,
@@ -33,6 +35,22 @@ impl FileService {
         }
     }
 
+    pub async fn get_files_by_map(&self, map: &HashMap<String, String>) -> Result<Vec<File>> {
+        let mut document = HashMap::new();
+        for i in map {
+            if *i.0 == "owner" {
+                document.insert(
+                    "owner".to_string(),
+                    Bson::ObjectId(ObjectId::from_str(i.1)?),
+                );
+            } else {
+                document.insert(i.0.to_string(), Bson::String(i.1.to_string()));
+            }
+        }
+        let doc = Document::from_iter(document);
+        self.file_db.get_files_by(doc).await
+    }
+
     pub async fn get_files_by_owner(&self, owner: &ObjectId) -> Result<Vec<File>> {
         self.file_db.get_files_by_owner(owner).await
     }
@@ -60,6 +78,13 @@ impl FileService {
     pub async fn get_files_by_prefix_position(&self, prefix: &str) -> Result<Vec<File>> {
         check_dir(prefix).map_err(into_string)?;
         self.file_db.get_files_by_prefix_position(prefix).await
+    }
+
+    pub async fn get_files_by_prefix_exact_position(&self, prefix: &str) -> Result<Vec<File>> {
+        check_dir(prefix).map_err(into_string)?;
+        self.file_db
+            .get_files_by_prefix_exact_position(prefix)
+            .await
     }
 
     pub async fn get_public_files_by_prefix_position(&self, prefix: &str) -> Result<Vec<File>> {
