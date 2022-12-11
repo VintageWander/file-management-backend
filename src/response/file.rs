@@ -4,6 +4,7 @@ use validator::Validate;
 use crate::base::file::File;
 use crate::base::file_version::FileVersion;
 use crate::base::user::User;
+use crate::error::Error;
 use crate::validation::file::*;
 use crate::Result;
 
@@ -31,8 +32,9 @@ pub struct FileResponse {
     pub updated_at: i64,
 }
 
-impl FileResponse {
-    pub fn from_file(f: File) -> Result<Self> {
+impl TryFrom<File> for FileResponse {
+    type Error = Error;
+    fn try_from(f: File) -> std::result::Result<Self, Self::Error> {
         let extension = f.extension_to_str().to_string();
         let visibility = f.visibility_to_str().to_string();
 

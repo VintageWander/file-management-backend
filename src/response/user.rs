@@ -4,6 +4,7 @@ use validator::Validate;
 use crate::base::file::File;
 use crate::base::folder::Folder;
 use crate::base::user::User;
+use crate::error::Error;
 use crate::validation::user::check_username;
 use crate::Result;
 
@@ -23,20 +24,9 @@ pub struct UserResponse {
     pub updated_at: i64,
 }
 
-impl From<User> for UserResponse {
-    fn from(u: User) -> Self {
-        Self {
-            id: u.id.to_string(),
-            username: u.username,
-            email: u.email,
-            created_at: u.created_at,
-            updated_at: u.updated_at,
-        }
-    }
-}
-
-impl UserResponse {
-    pub fn from_user(u: User) -> Result<Self> {
+impl TryFrom<User> for UserResponse {
+    type Error = Error;
+    fn try_from(u: User) -> std::result::Result<Self, Self::Error> {
         let res = Self {
             id: u.id.to_string(),
             username: u.username,

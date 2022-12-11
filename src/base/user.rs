@@ -65,6 +65,6 @@ impl User {
     }
 
     pub fn into_response(self) -> Result<UserResponse> {
-        UserResponse::from_user(self)
+        UserResponse::try_from(self)
     }
 }

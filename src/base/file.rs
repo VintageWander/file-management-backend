@@ -142,6 +142,6 @@ impl File {
     }
 
     pub fn into_response(self) -> Result<FileResponse> {
-        FileResponse::from_file(self)
+        FileResponse::try_from(self)
     }
 }

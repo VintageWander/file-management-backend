@@ -3,6 +3,7 @@ use validator::Validate;
 
 use crate::{
     base::{folder::Folder, user::User},
+    error::Error,
     validation::file::{check_dir, check_folder_name, check_visibility},
     Result,
 };
@@ -31,8 +32,9 @@ pub struct FolderResponse {
     pub updated_at: i64,
 }
 
-impl FolderResponse {
-    pub fn from_folder(f: Folder) -> Result<Self> {
+impl TryFrom<Folder> for FolderResponse {
+    type Error = Error;
+    fn try_from(f: Folder) -> std::result::Result<Self, Self::Error> {
         let visibility = f.visibility_to_str().to_string();
 
         let folder_res = Self {

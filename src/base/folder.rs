@@ -86,7 +86,7 @@ impl Folder {
     }
 
     pub fn into_response(self) -> Result<FolderResponse> {
-        FolderResponse::from_folder(self)
+        FolderResponse::try_from(self)
     }
 
     pub fn new_root(owner: &User) -> Result<Self> {
