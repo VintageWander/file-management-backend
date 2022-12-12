@@ -1,4 +1,4 @@
-use salvo::{prelude::empty_handler, Router};
+use salvo::Router;
 
 use crate::{
     handler::{
@@ -46,7 +46,6 @@ pub fn get_file_route() -> Router {
 pub fn create_file_route() -> Router {
     Router::with_path("create")
         .hoop(check_login_middleware)
-        .options(empty_handler)
         .post(create_file_handler)
 }
 
@@ -54,7 +53,6 @@ pub fn update_file_route() -> Router {
     Router::with_path("update/<param_file_id>")
         .hoop(check_login_middleware)
         .hoop(get_file_by_id_middleware)
-        .options(empty_handler)
         .put(update_file_handler)
 }
 
@@ -62,7 +60,6 @@ pub fn delete_file_route() -> Router {
     Router::with_path("delete/<param_file_id>")
         .hoop(check_login_middleware)
         .hoop(get_file_by_id_middleware)
-        .options(empty_handler)
         .delete(delete_file_handler)
 }
 
@@ -84,7 +81,6 @@ pub fn restore_file_route() -> Router {
     Router::with_path("<param_file_id>/versions/restore/<version_number>")
         .hoop(check_login_middleware)
         .hoop(get_file_by_id_middleware)
-        .options(empty_handler)
         .put(restore_file_handler)
 }
 
@@ -92,6 +88,5 @@ pub fn delete_version_route() -> Router {
     Router::with_path("<param_file_id>/versions/delete/<version_number>")
         .hoop(check_login_middleware)
         .hoop(get_file_by_id_middleware)
-        .options(empty_handler)
         .delete(delete_file_version_handler)
 }

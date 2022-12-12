@@ -1,4 +1,4 @@
-use salvo::{prelude::empty_handler, Router};
+use salvo::Router;
 
 use crate::{
     handler::{
@@ -45,22 +45,18 @@ pub fn get_user_route() -> Router {
 }
 
 pub fn create_user_route() -> Router {
-    Router::with_path("register")
-        .options(empty_handler)
-        .post(create_user_handler)
+    Router::with_path("register").post(create_user_handler)
 }
 
 pub fn update_user_route() -> Router {
     Router::with_path("update/<param_user_id>")
         .hoop(check_login_middleware)
-        .options(empty_handler)
         .put(update_user_handler)
 }
 
 pub fn delete_user_route() -> Router {
     Router::with_path("delete/<param_user_id>")
         .hoop(check_login_middleware)
-        .options(empty_handler)
         .delete(delete_user_handler)
 }
 
@@ -71,21 +67,17 @@ pub fn profile_route() -> Router {
 }
 
 pub fn login_route() -> Router {
-    Router::with_path("login")
-        .options(empty_handler)
-        .post(login_handler)
+    Router::with_path("login").post(login_handler)
 }
 
 pub fn refresh_route() -> Router {
     Router::with_path("refresh")
         .hoop(check_login_middleware)
-        .options(empty_handler)
         .post(refresh_handler)
 }
 
 pub fn logout_route() -> Router {
     Router::with_path("logout")
         .hoop(check_login_middleware)
-        .options(empty_handler)
         .delete(logout_handler)
 }

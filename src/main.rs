@@ -6,7 +6,13 @@ use db::{
     user_db::UserDB,
 };
 use dotenv::dotenv;
-use salvo::{affix, cors::Cors, prelude::TcpListener, size_limiter::max_size, Router, Server};
+use salvo::{
+    affix,
+    cors::Cors,
+    prelude::{empty_handler, TcpListener},
+    size_limiter::max_size,
+    Router, Server,
+};
 use service::{
     file_service::FileService, file_version_service::FileVersionService,
     folder_service::FolderService, user_service::UserService,
@@ -46,29 +52,32 @@ async fn main() -> Result<()> {
     let file_version_service = FileVersionService::init(&file_version_db, &s3);
 
     let cors_builder = Cors::builder()
-        .allow_methods(vec!["GET", "POST", "PUT", "DELETE"])
+        .allow_methods(vec!["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+        .allow_any_origin()
+        .allow_credentials(true)
         .allow_headers(vec![
             "CONTENT-TYPE",
-            "Access-Control-Allow-Credential",
+            "Access-Control-Request-Headers",
             "Access-Control-Request-Method",
             "Access-Control-Allow-Origin",
             "Access-Control-Allow-Headers",
-            "Set-Cookie",
+            "Access-Control-Allow-Methods",
+            "Access-Control-Max-Age",
+            "Authorization",
         ])
-        .allow_credentials(true)
-        .allow_any_origin()
         .build();
 
-    let router = Router::with_hoop(cors_builder)
-        .hoop(
-            affix::insert("user_service", user_service)
-                .insert("folder_service", folder_service)
-                .insert("file_service", file_service)
-                .insert("file_version_service", file_version_service)
-                .insert("storage", s3),
-        )
-        .hoop(max_size(1024 * 1024 * 100)) // limit to 100MBs per request
-        .push(routes::routes());
+    let router = Router::with_hoop(
+        affix::insert("user_service", user_service)
+            .insert("folder_service", folder_service)
+            .insert("file_service", file_service)
+            .insert("file_version_service", file_version_service)
+            .insert("storage", s3),
+    )
+    .hoop(max_size(1024 * 1024 * 100)) // limit to 100MBs per request
+    .hoop(cors_builder)
+    .push(Router::with_path("/<**>").options(empty_handler)) // Dealing with the browser
+    .push(routes::routes());
 
     let port = std::env::var("PORT")?;
 
