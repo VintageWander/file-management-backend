@@ -146,12 +146,29 @@ impl FolderService {
             if old_folder.fullpath == folder.position {
                 return Err("Cannot move to self".into());
             }
-            self.folder_db
-                .move_inner_folders(&old_folder.position, &old_folder.fullpath, &folder.position)
-                .await?;
-            self.file_db
-                .move_inner_files(&old_folder.position, &old_folder.fullpath, &folder.position)
-                .await?;
+            if old_folder.fullpath.matches('/').count() == folder.fullpath.matches('/').count() {
+                self.folder_db
+                    .move_inner_folders(
+                        &old_folder.fullpath,
+                        &old_folder.fullpath,
+                        &folder.fullpath,
+                    )
+                    .await?;
+                self.file_db
+                    .move_inner_files(&old_folder.fullpath, &old_folder.fullpath, &folder.fullpath)
+                    .await?;
+            } else {
+                self.folder_db
+                    .move_inner_folders(
+                        &old_folder.position,
+                        &old_folder.fullpath,
+                        &folder.position,
+                    )
+                    .await?;
+                self.file_db
+                    .move_inner_files(&old_folder.position, &old_folder.fullpath, &folder.position)
+                    .await?;
+            }
         }
 
         let updated_folder = self.folder_db.update_folder(folder_id, folder).await?;

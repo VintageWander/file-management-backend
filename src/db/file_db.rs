@@ -187,7 +187,7 @@ impl FileDB {
         // fullpath for regex search
         // use new position to replace old position
 
-        let position_regex = Regex {
+        let position_regex = &Regex {
             pattern: format!("^{old_fullpath}"),
             options: String::new(),
         };
@@ -195,9 +195,6 @@ impl FileDB {
         self.collection
             .update_many(
                 doc! {
-                    "position": {
-                        "$regex": position_regex.clone()
-                    },
                     "fullpath": {
                         "$regex": position_regex
                     }
@@ -206,7 +203,7 @@ impl FileDB {
                     doc! {
                         "$set": {
                             "position": {
-                                "$replaceOne": {
+                                "$replaceAll": {
                                     "input": "$position",
                                     "find": old_position,
                                     "replacement": new_position
@@ -217,7 +214,7 @@ impl FileDB {
                     doc! {
                         "$set": {
                             "fullpath": {
-                                "$replaceOne": {
+                                "$replaceAll": {
                                     "input": "$fullpath",
                                     "find": old_position,
                                     "replacement": new_position

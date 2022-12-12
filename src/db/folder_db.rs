@@ -169,9 +169,6 @@ impl FolderDB {
         self.collection
             .update_many(
                 doc! {
-                    "position": {
-                        "$regex": position_regex
-                    },
                     "fullpath": {
                         "$regex": position_regex
                     }
@@ -180,7 +177,7 @@ impl FolderDB {
                     doc! {
                         "$set": {
                             "position": {
-                                "$replaceOne": {
+                                "$replaceAll": {
                                     "input": "$position",
                                     "find": old_position,
                                     "replacement": new_position
@@ -191,7 +188,7 @@ impl FolderDB {
                     doc! {
                         "$set": {
                             "fullpath": {
-                                "$replaceOne": {
+                                "$replaceAll": {
                                     "input": "$fullpath",
                                     "find": old_position,
                                     "replacement": new_position
