@@ -1,5 +1,6 @@
 use std::{collections::HashMap, str::FromStr};
 
+use futures::try_join;
 use mongodb::bson::{oid::ObjectId, Bson, Document};
 
 use crate::{
@@ -147,27 +148,33 @@ impl FolderService {
                 return Err("Cannot move to self".into());
             }
             if old_folder.fullpath.matches('/').count() == folder.fullpath.matches('/').count() {
-                self.folder_db
-                    .move_inner_folders(
+                // This means that the user is renaming a folder
+                try_join!(
+                    self.folder_db.move_inner_folders(
                         &old_folder.fullpath,
                         &old_folder.fullpath,
                         &folder.fullpath,
+                    ),
+                    self.file_db.move_inner_files(
+                        &old_folder.fullpath,
+                        &old_folder.fullpath,
+                        &folder.fullpath
                     )
-                    .await?;
-                self.file_db
-                    .move_inner_files(&old_folder.fullpath, &old_folder.fullpath, &folder.fullpath)
-                    .await?;
+                )?;
             } else {
-                self.folder_db
-                    .move_inner_folders(
+                // This indicates a move folder to new position
+                try_join!(
+                    self.folder_db.move_inner_folders(
                         &old_folder.position,
                         &old_folder.fullpath,
-                        &folder.position,
+                        &folder.position, // the difference is here
+                    ),
+                    self.file_db.move_inner_files(
+                        &old_folder.position,
+                        &old_folder.fullpath,
+                        &folder.position
                     )
-                    .await?;
-                self.file_db
-                    .move_inner_files(&old_folder.position, &old_folder.fullpath, &folder.position)
-                    .await?;
+                )?;
             }
         }
 

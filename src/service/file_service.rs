@@ -1,6 +1,7 @@
 use std::{collections::HashMap, str::FromStr};
 
 use chrono::Utc;
+use futures::try_join;
 use mongodb::bson::{oid::ObjectId, Bson, Document};
 
 use crate::{
@@ -120,11 +121,11 @@ impl FileService {
         }
         if !data.is_empty() {
             let internal_full_filename = &format!("{}.{}", file.id, file.extension_to_str());
-
-            self.storage
-                .create_file(internal_full_filename, data)
-                .await?;
-            self.storage.create_folder(&format!("{}/", file.id)).await?;
+            let version_folder_name = &format!("{}/", file.id);
+            try_join!(
+                self.storage.create_file(internal_full_filename, data),
+                self.storage.create_folder(version_folder_name)
+            )?;
         }
 
         let file = self.file_db.create_file(file).await?;
