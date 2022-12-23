@@ -1,6 +1,7 @@
 use salvo::{handler, Depot, Request};
 
 use crate::{
+    error::Error,
     helper::{
         cookie::get_cookie_user_id,
         depot::{get_file_version_service, get_param_file, get_user_service},
@@ -20,6 +21,12 @@ pub async fn delete_file_version_handler(req: &mut Request, depot: &mut Depot) -
     let version_number = get_param_version_number(req)?;
 
     let param_file = get_param_file(depot)?;
+
+    if *cookie_user_id != param_file.owner {
+        return Err(Error::Permissions(
+            "You cannot delete other user's file".into(),
+        ));
+    }
 
     let file_version_service = get_file_version_service(depot)?;
 
