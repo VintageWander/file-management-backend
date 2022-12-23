@@ -173,30 +173,24 @@ impl FolderDB {
                         "$regex": position_regex
                     }
                 },
-                vec![
-                    doc! {
-                        "$set": {
-                            "position": {
-                                "$replaceAll": {
-                                    "input": "$position",
-                                    "find": old_position,
-                                    "replacement": new_position
-                                }
+                vec![doc! {
+                    "$set": {
+                        "position": {
+                            "$replaceAll": {
+                                "input": "$position",
+                                "find": old_position,
+                                "replacement": new_position
+                            }
+                        },
+                        "fullpath": {
+                            "$replaceAll": {
+                                "input": "$fullpath",
+                                "find": old_position,
+                                "replacement": new_position
                             }
                         }
-                    },
-                    doc! {
-                        "$set": {
-                            "fullpath": {
-                                "$replaceAll": {
-                                    "input": "$fullpath",
-                                    "find": old_position,
-                                    "replacement": new_position
-                                }
-                            }
-                        }
-                    },
-                ],
+                    }
+                }],
                 None,
             )
             .await?;
