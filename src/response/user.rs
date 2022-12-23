@@ -53,13 +53,13 @@ impl FinalUserResponse {
     pub fn new(user: User, files: Vec<File>, folders: Vec<Folder>) -> Result<Self> {
         let files = files
             .into_iter()
-            .map(|f| f.into_response())
-            .collect::<Result<_>>()?;
+            .flat_map(|f| f.into_response())
+            .collect::<Vec<_>>();
 
         let folders = folders
             .into_iter()
-            .map(|f| f.into_response())
-            .collect::<Result<_>>()?;
+            .flat_map(|f| f.into_response())
+            .collect::<Vec<_>>();
 
         Ok(Self {
             user: user.into_response()?,
