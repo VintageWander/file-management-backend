@@ -1,3 +1,4 @@
+use futures::try_join;
 use salvo::{handler, Depot, Request};
 
 use crate::{
@@ -44,12 +45,10 @@ pub async fn update_user_handler(req: &mut Request, depot: &Depot) -> WebResult 
     let changed_user = user_service.update_user(update_user).await?;
 
     // Get the files and folders that the user owns
-    let files = get_file_service(depot)?
-        .get_files_by_owner(cookie_user_id)
-        .await?;
-    let folders = get_folder_service(depot)?
-        .get_folders_by_owner(cookie_user_id)
-        .await?;
+    let (files, folders) = try_join!(
+        get_file_service(depot)?.get_files_by_owner(cookie_user_id),
+        get_folder_service(depot)?.get_folders_by_owner(cookie_user_id)
+    )?;
 
     Ok(Web::ok(
         "Update user successfully",
