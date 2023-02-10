@@ -19,18 +19,25 @@ pub struct UpdateUserRequest {
     #[validate(custom = "check_password")]
     pub new_password: Option<String>,
 
-    #[validate(must_match(
-        other = "new_password",
-        message = "The password must match with confirmPassword"
-    ))]
+    #[validate(custom = "check_password")]
     pub confirm_password: Option<String>,
 }
 
 impl UpdateUserRequest {
     pub fn into_user(self, old_user: User) -> Result<User> {
         self.validate()?;
-        if self.new_password != self.confirm_password {
-            return Err("The new password and the confirm new password does not match".into());
+
+        if let (Some(new_password), Some(confirm_password)) =
+            (&self.new_password, &self.confirm_password)
+        {
+            if new_password != confirm_password {
+                return Err("The new password and the confirm new password does not match".into());
+            }
+        } else {
+            return Err(
+                "The new password and confirm password must exists together, or omit both of them"
+                    .into(),
+            );
         }
         if *old_user.password != self.password {
             return Err("The provided password does not match with the current password".into());

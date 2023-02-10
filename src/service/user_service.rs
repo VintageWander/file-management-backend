@@ -47,9 +47,9 @@ impl UserService {
             .await
     }
 
-    pub async fn exists_user_by_id(&self, user_id: &ObjectId) -> Result<bool> {
-        self.user_db.exists_user_by_id(user_id).await
-    }
+    // pub async fn exists_user_by_id(&self, user_id: &ObjectId) -> Result<bool> {
+    //     self.user_db.exists_user_by_id(user_id).await
+    // }
 
     pub async fn exists_user_by_username(&self, username: &str) -> Result<bool> {
         self.user_db.exists_user_by_username(username).await
@@ -59,11 +59,11 @@ impl UserService {
         self.user_db.exists_user_by_email(email).await
     }
 
-    pub async fn exists_user_by_login_info(&self, username: &str, password: &str) -> Result<bool> {
-        self.user_db
-            .exists_user_by_login_info(username, password)
-            .await
-    }
+    // pub async fn exists_user_by_login_info(&self, username: &str, password: &str) -> Result<bool> {
+    //     self.user_db
+    //         .exists_user_by_login_info(username, password)
+    //         .await
+    // }
 
     pub async fn create_user(&self, user: User) -> Result<User> {
         if self.exists_user_by_email(&user.email).await? {

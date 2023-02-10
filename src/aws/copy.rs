@@ -6,11 +6,7 @@ use crate::{
 };
 
 impl S3 {
-    pub async fn copy_file(
-        &self,
-        fullpath: &str,
-        dest_fullpath: &str,
-    ) -> Result<()> {
+    pub async fn copy_file(&self, fullpath: &str, dest_fullpath: &str) -> Result<()> {
         check_fullpath(fullpath).map_err(into_string)?;
         check_fullpath(dest_fullpath).map_err(into_string)?;
 

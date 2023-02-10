@@ -9,7 +9,7 @@ use crate::{
     base::{file::File, file_version::FileVersion},
     db::{file_db::FileDB, file_version_db::FileVersionDB, folder_db::FolderDB},
     helper::into_string,
-    validation::file::{check_dir, check_fullpath},
+    validation::file::check_fullpath,
     Result,
 };
 
@@ -60,9 +60,9 @@ impl FileService {
         self.file_db.get_public_files_by_owner(owner).await
     }
 
-    pub async fn get_public_files(&self) -> Result<Vec<File>> {
-        self.file_db.get_public_files().await
-    }
+    // pub async fn get_public_files(&self) -> Result<Vec<File>> {
+    //     self.file_db.get_public_files().await
+    // }
 
     pub async fn get_file_by_id(&self, file_id: &ObjectId) -> Result<File> {
         self.file_db.get_file_by_id(file_id).await
@@ -76,28 +76,28 @@ impl FileService {
         self.file_db.get_file_by_id_owner(file_id, owner).await
     }
 
-    pub async fn get_files_by_prefix_position(&self, prefix: &str) -> Result<Vec<File>> {
-        check_dir(prefix).map_err(into_string)?;
-        self.file_db.get_files_by_prefix_position(prefix).await
-    }
+    // pub async fn get_files_by_prefix_position(&self, prefix: &str) -> Result<Vec<File>> {
+    //     check_dir(prefix).map_err(into_string)?;
+    //     self.file_db.get_files_by_prefix_position(prefix).await
+    // }
 
-    pub async fn get_files_by_prefix_exact_position(&self, prefix: &str) -> Result<Vec<File>> {
-        check_dir(prefix).map_err(into_string)?;
-        self.file_db
-            .get_files_by_prefix_exact_position(prefix)
-            .await
-    }
+    // pub async fn get_files_by_prefix_exact_position(&self, prefix: &str) -> Result<Vec<File>> {
+    //     check_dir(prefix).map_err(into_string)?;
+    //     self.file_db
+    //         .get_files_by_prefix_exact_position(prefix)
+    //         .await
+    // }
 
-    pub async fn get_public_files_by_prefix_position(&self, prefix: &str) -> Result<Vec<File>> {
-        check_dir(prefix).map_err(into_string)?;
-        self.file_db
-            .get_public_files_by_prefix_position(prefix)
-            .await
-    }
+    // pub async fn get_public_files_by_prefix_position(&self, prefix: &str) -> Result<Vec<File>> {
+    //     check_dir(prefix).map_err(into_string)?;
+    //     self.file_db
+    //         .get_public_files_by_prefix_position(prefix)
+    //         .await
+    // }
 
-    pub async fn exists_file_by_id(&self, file_id: &ObjectId) -> Result<bool> {
-        self.file_db.exists_file_by_id(file_id).await
-    }
+    // pub async fn exists_file_by_id(&self, file_id: &ObjectId) -> Result<bool> {
+    //     self.file_db.exists_file_by_id(file_id).await
+    // }
 
     pub async fn exists_file_by_fullpath(&self, fullpath: &str) -> Result<bool> {
         check_fullpath(fullpath).map_err(into_string)?;

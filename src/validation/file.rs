@@ -55,28 +55,28 @@ pub fn check_fullpath(fullpath: &str) -> Result<(), ValidationError> {
     )
 }
 
-pub fn check_version_path(version_path: &str) -> Result<(), ValidationError> {
-    // Matches
-    // user-version-db/folder/hello/123.txt
-    // user-version-db/hello/123.txt
-    // Rejects:
-    // user/folder/hello.txt
-    // user-version-db/folder/hello.txt
-    // user-version-db/123.txt
-    check_with(
-        version_path,
-        r#"^[a-zA-Z0-9-_]{3,}(-version-db)[/](([a-zA-Z0-9-_]{3,}[/])*)[0-9]{3,}\.(png|txt|jpg|jpeg|mp3)$"#,
-        "The version path is invalid",
-    )
-}
+// pub fn check_version_path(version_path: &str) -> Result<(), ValidationError> {
+//     // Matches
+//     // user-version-db/folder/hello/123.txt
+//     // user-version-db/hello/123.txt
+//     // Rejects:
+//     // user/folder/hello.txt
+//     // user-version-db/folder/hello.txt
+//     // user-version-db/123.txt
+//     check_with(
+//         version_path,
+//         r#"^[a-zA-Z0-9-_]{3,}(-version-db)[/](([a-zA-Z0-9-_]{3,}[/])*)[0-9]{3,}\.(png|txt|jpg|jpeg|mp3)$"#,
+//         "The version path is invalid",
+//     )
+// }
 
-pub fn check_version_folder(version_folder: &str) -> Result<(), ValidationError> {
-    check_with(
-        version_folder,
-        r#"^[a-zA-Z0-9-_]{3,}(-version-db)[/](([a-zA-Z0-9-_]{3,}[/])*)$"#,
-        "The version folder is invalid",
-    )
-}
+// pub fn check_version_folder(version_folder: &str) -> Result<(), ValidationError> {
+//     check_with(
+//         version_folder,
+//         r#"^[a-zA-Z0-9-_]{3,}(-version-db)[/](([a-zA-Z0-9-_]{3,}[/])*)$"#,
+//         "The version folder is invalid",
+//     )
+// }
 
 pub fn check_folder_name(folder_name: &str) -> Result<(), ValidationError> {
     check_filename(folder_name)

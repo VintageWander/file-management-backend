@@ -1,5 +1,4 @@
 pub mod body;
-pub mod comparison;
 pub mod cookie;
 pub mod depot;
 pub mod file;

@@ -9,11 +9,7 @@ use crate::{
 };
 
 impl S3 {
-    pub async fn create_file(
-        &self,
-        fullpath: &str,
-        data: Vec<u8>,
-    ) -> Result<()> {
+    pub async fn create_file(&self, fullpath: &str, data: Vec<u8>) -> Result<()> {
         check_fullpath(fullpath).map_err(into_string)?;
 
         let mime = mime_guess::from_path(fullpath)

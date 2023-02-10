@@ -6,11 +6,7 @@ use crate::{
 };
 
 impl S3 {
-    pub async fn rename_file(
-        &self,
-        fullpath: &str,
-        rename_path: &str,
-    ) -> Result<()> {
+    pub async fn rename_file(&self, fullpath: &str, rename_path: &str) -> Result<()> {
         check_fullpath(fullpath).map_err(into_string)?;
         check_fullpath(rename_path).map_err(into_string)?;
 
@@ -26,11 +22,7 @@ impl S3 {
         self.move_file(fullpath, rename_path).await
     }
 
-    pub async fn rename_folder(
-        &self,
-        dir_path: &str,
-        rename_path: &str,
-    ) -> Result<()> {
+    pub async fn rename_folder(&self, dir_path: &str, rename_path: &str) -> Result<()> {
         check_dir(dir_path).map_err(into_string)?;
         check_dir(rename_path).map_err(into_string)?;
 

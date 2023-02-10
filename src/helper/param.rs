@@ -6,7 +6,7 @@ use crate::Result;
 
 pub fn extract_from_param<'a, T: Deserialize<'a>>(req: &'a mut Request, key: &str) -> Result<T> {
     req.param::<T>(key)
-        .ok_or_else(|| format!("Cannot get {} from param", key).into())
+        .ok_or_else(|| format!("Cannot get {key} from param").into())
 }
 
 pub fn get_param_user_id(req: &mut Request) -> Result<ObjectId> {

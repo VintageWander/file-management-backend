@@ -48,9 +48,9 @@ impl FolderService {
         self.folder_db.get_folders_by_owner(owner).await
     }
 
-    pub async fn get_public_folders(&self) -> Result<Vec<Folder>> {
-        self.folder_db.get_public_folders().await
-    }
+    // pub async fn get_public_folders(&self) -> Result<Vec<Folder>> {
+    //     self.folder_db.get_public_folders().await
+    // }
 
     pub async fn get_public_folders_by_owner(&self, owner: &ObjectId) -> Result<Vec<Folder>> {
         self.folder_db.get_public_folders_by_owner(owner).await
@@ -60,57 +60,57 @@ impl FolderService {
         self.folder_db.get_folder_by_id(folder_id).await
     }
 
-    pub async fn get_folder_by_id_owner(
-        &self,
-        folder_id: &ObjectId,
-        owner: &ObjectId,
-    ) -> Result<Folder> {
-        self.folder_db
-            .get_folder_by_id_owner(folder_id, owner)
-            .await
-    }
+    // pub async fn get_folder_by_id_owner(
+    //     &self,
+    //     folder_id: &ObjectId,
+    //     owner: &ObjectId,
+    // ) -> Result<Folder> {
+    //     self.folder_db
+    //         .get_folder_by_id_owner(folder_id, owner)
+    //         .await
+    // }
 
     pub async fn get_public_folder_by_id(&self, folder_id: &ObjectId) -> Result<Folder> {
         self.folder_db.get_public_folder_by_id(folder_id).await
     }
 
-    pub async fn get_folder_by_fullpath(&self, fullpath: &str) -> Result<Folder> {
-        check_dir(fullpath).map_err(into_string)?;
-        self.folder_db.get_folder_by_fullpath(fullpath).await
-    }
+    // pub async fn get_folder_by_fullpath(&self, fullpath: &str) -> Result<Folder> {
+    //     check_dir(fullpath).map_err(into_string)?;
+    //     self.folder_db.get_folder_by_fullpath(fullpath).await
+    // }
 
-    pub async fn get_folders_by_prefix_position(&self, prefix: &str) -> Result<Vec<Folder>> {
-        check_dir(prefix).map_err(into_string)?;
-        self.folder_db.get_folders_by_prefix_position(prefix).await
-    }
+    // pub async fn get_folders_by_prefix_position(&self, prefix: &str) -> Result<Vec<Folder>> {
+    //     check_dir(prefix).map_err(into_string)?;
+    //     self.folder_db.get_folders_by_prefix_position(prefix).await
+    // }
 
-    pub async fn get_folders_by_prefix_exact_position(&self, prefix: &str) -> Result<Vec<Folder>> {
-        check_dir(prefix).map_err(into_string)?;
-        self.folder_db
-            .get_folders_by_prefix_exact_position(prefix)
-            .await
-    }
+    // pub async fn get_folders_by_prefix_exact_position(&self, prefix: &str) -> Result<Vec<Folder>> {
+    //     check_dir(prefix).map_err(into_string)?;
+    //     self.folder_db
+    //         .get_folders_by_prefix_exact_position(prefix)
+    //         .await
+    // }
 
-    pub async fn get_public_folders_by_prefix_position(&self, prefix: &str) -> Result<Vec<Folder>> {
-        check_dir(prefix).map_err(into_string)?;
-        self.folder_db
-            .get_public_folders_by_prefix_position(prefix)
-            .await
-    }
+    // pub async fn get_public_folders_by_prefix_position(&self, prefix: &str) -> Result<Vec<Folder>> {
+    //     check_dir(prefix).map_err(into_string)?;
+    //     self.folder_db
+    //         .get_public_folders_by_prefix_position(prefix)
+    //         .await
+    // }
 
-    pub async fn exists_folder_by_id(&self, folder_id: &ObjectId) -> Result<bool> {
-        self.folder_db.exists_folder_by_id(folder_id).await
-    }
+    // pub async fn exists_folder_by_id(&self, folder_id: &ObjectId) -> Result<bool> {
+    //     self.folder_db.exists_folder_by_id(folder_id).await
+    // }
 
     pub async fn exists_folder_by_fullpath(&self, fullpath: &str) -> Result<bool> {
         check_dir(fullpath).map_err(into_string)?;
         self.folder_db.exists_folder_by_fullpath(fullpath).await
     }
 
-    pub async fn exists_folder_by_position(&self, position: &str) -> Result<bool> {
-        check_dir(position).map_err(into_string)?;
-        self.folder_db.exists_folder_by_position(position).await
-    }
+    // pub async fn exists_folder_by_position(&self, position: &str) -> Result<bool> {
+    //     check_dir(position).map_err(into_string)?;
+    //     self.folder_db.exists_folder_by_position(position).await
+    // }
 
     pub async fn create_folder(&self, folder: Folder) -> Result<Folder> {
         if self.exists_folder_by_fullpath(&folder.fullpath).await? {

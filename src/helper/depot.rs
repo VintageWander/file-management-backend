@@ -16,15 +16,15 @@ pub fn extract_from_depot<'a, T: Sync + Send + Clone + 'static>(
 ) -> Result<&'a T> {
     depot
         .get::<T>(key)
-        .ok_or_else(|| format!("Cannot get {} from depot", key).into())
+        .ok_or_else(|| format!("Cannot get {key} from depot").into())
 }
 
-pub fn extract_from_depot_option<'a, T: Sync + Send + Clone + 'static>(
-    depot: &'a Depot,
-    key: &'a str,
-) -> Option<&'a T> {
-    depot.get::<T>(key)
-}
+// pub fn extract_from_depot_option<'a, T: Sync + Send + Clone + 'static>(
+//     depot: &'a Depot,
+//     key: &'a str,
+// ) -> Option<&'a T> {
+//     depot.get::<T>(key)
+// }
 
 // Getting from depot means 2 things
 // Getting services injected into affix
